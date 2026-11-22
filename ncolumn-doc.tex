@@ -1,0 +1,102 @@
+% ncolumnパッケージの使用説明。LuaLaTeXで組む。
+\documentclass[a4paper,10pt]{ltjsarticle}
+\usepackage[columns=2,same-page-spans]{ncolumn}
+\usepackage{xcolor}
+\makeatletter\def\verbatim@font{\small\ttfamily}\makeatother
+\setlength\columnsep{2\zw}
+\newcommand\pkg[1]{\textsf{#1}}
+\newcommand\code[1]{\texttt{#1}}
+\newcommand\cs[1]{\texttt{\textbackslash #1}}
+\newcommand\demo[2]{\centering\fcolorbox{black!40}{black!8}{\parbox[c][#1][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\centering\small #2}}}
+\title{\pkg{ncolumn}パッケージ\\\large twocolumn方式によるN段組}
+\author{}
+\date{v0.1.0\quad 2026-11-23}
+\begin{document}
+\ncolumn{2}[{\maketitle
+\begin{quote}\small
+LaTeX標準の\cs{twocolumn}の出力ルーチンをそのままN段に一般化する。段を1つずつ順に確定する方式なので、通常のフロート、脚注、\cs{marginpar}、\pkg{tcolorbox}のbreakableなどがそのまま使える。四隅からの段抜き配置と、脚注の配置方式の選択を加えている。この文書自体も本パッケージで組んでいる。
+\end{quote}\bigskip}]
+
+\section{読み込み}
+\begin{verbatim}
+\usepackage[columns=3]{ncolumn}
+\end{verbatim}
+\code{columns=N}で文書全体をN段にする。クラスに\code{twocolumn}を指定しただけの文書では2段のままで、組版結果はカーネルの\cs{twocolumn}と一致する。LaTeX 2025-06-01以降が必要で、pdf\LaTeX{}、Xe\LaTeX{}、Lua\LaTeX{}、p\LaTeX{}、up\LaTeX{}の横組と縦組に対応する。
+
+\section{段数の切り替え}
+\begin{verbatim}
+\ncolumn{4}
+\ncolumn{3}[\section{見出し}]
+\onecolumn
+\twocolumn
+\end{verbatim}
+\cs{ncolumn}は改ページしてから段数を変える。角括弧の引数は\cs{twocolumn}と同じく、そのページの先頭に全段抜きで置かれる。\cs{twocolumn}は「2段」ではなく「直前に使っていた段数」へ戻す。クラスが\cs{maketitle}や索引の後で段組を復帰させるのに使うためである。
+
+\section{段抜きフロート}
+\begin{verbatim}
+\begin{figure*}[t]
+\begin{figure*}[b]
+\begin{figure*}[span=2,at=tl]
+\begin{figure*}[!,span=2,at=br]
+\end{verbatim}
+\code{figure*}と\code{table*}の引数に\code{=}が含まれていると、key=valueとして解釈する。\code{span}は抜く段数、\code{at}は起点となる隅で、\code{tl}、\code{tr}、\code{bl}、\code{br}のいずれかを指定する。カーネルでは無効な\code{[b]}(全段抜きを段末側に置く)も使える。
+
+\begin{figure*}[b]
+\demo{18mm}{\code{\textbackslash begin\{figure*\}[b]}\quad 全段抜きを段末側に置いた例}
+\caption{段末側の全段抜き}
+\end{figure*}
+
+\code{at}は論理方向で指定する。\code{t}と\code{b}は段の先頭側と末尾側、\code{l}と\code{r}は第1段側と最終段側を表す。縦組では第1段が上段、段頭が右になるので、\code{tl}は紙面の右上にあたる。
+
+1ページに複数の段抜きを置けるが、覆う段の予約済みの高さがそろっていない場合は、穴があかないよう次のページへ回す。
+
+既定では、段抜きはカーネルと同じく次ページ以降に置かれる。\code{same-page-spans}を指定すると、覆う段がまだ組み始められていない場合(段頭側)や、現在の段以降だけを覆い空きがある場合(段末側)に、出現したページへ置く。
+
+\section{段抜きブロック}
+\begin{verbatim}
+\spanblock[span=3,at=tl]{...}
+\spanblock*[span=2,at=br]{...}
+\end{verbatim}
+見出しや囲み記事など、フロートではない素材を段抜きで置く。アスタリスクなしは改ページしてそのページに置き、アスタリスク付きはフロートと同様に次ページ以降へ送る。
+
+\section{脚注}
+\begin{verbatim}
+\ncolumnsetup{footnotes=span,
+  footnote-columns=2}
+\end{verbatim}
+\code{footnotes}には次の値を指定する。
+\begin{description}
+\item[\code{column}] 出現した段の下に置く(既定)。
+\item[\code{last-column}] ページ内の脚注を最終段の下に集める。1回の実行で確定する。
+\item[\code{span}] 版面の下に全段抜きで置く。\code{footnote-columns=M}でM段組にできる。
+\end{description}
+\code{span}では、後ろの段の脚注のために確定済みの前の段を縮めることができない。そこで各ページの脚注領域の高さを\code{.aux}に記録し、次の実行で全段からあらかじめ差し引く。高さが変わったときは再実行を促す警告が出る。脚注の場所を確保すると合印のある行が次ページへ逃げ、確保をやめると戻る、という振動を検出した場合は、確保した側に固定する。\code{footnote-reserve}に長さを指定すると、\code{.aux}を使わず固定の高さを確保する。
+
+jlreqの縦組では、指定が無ければ\code{last-column}を既定にする。
+
+\section{余白注}
+3段以上では、\cs{marginpar}は近い側の余白へ出る。同じ余白を共有する段の余白注どうしは重ならない。
+
+\section{制限事項}
+\begin{itemize}
+\item 段抜きは四隅起点のみで、ページの途中で本文を上下に割る配置はできない。最終ページの段をそろえる機能もない。
+\item \cs{clearpage}などで掃き出されるとき、部分的な段抜きフロートは隅ではなくフロートページに出る。
+\item \code{footnotes=span}では、脚注はページをまたいで分割されない。
+\item 次のパッケージとは併用できない。\pkg{ftnright}、\pkg{nidanfloat}、\pkg{dblfloatfix}、\pkg{cuted}、\pkg{balance}、\pkg{flushend}、\pkg{pbalance}、\pkg{flowfram}、\pkg{dblfnote}。
+\end{itemize}
+
+\ncolumn{3}[{\section{3段組の例}
+ここから\cs{ncolumn}\code{\{3\}}で3段に切り替えている。図\ref{fig:tl}は\code{[span=2,at=tl]}、図\ref{fig:br}は\code{[span=2,at=br]}で配置した。\bigskip}]
+
+\newcommand\filler{段を1つずつ順に確定していく方式では、TeXから見ると1段が1ページにあたる。そのため段ごとの高さを変えるだけで、段抜きの素材を避けて本文を流すことができる。脚注\footnote{この脚注は出現した段の下に置かれる。}も段ごとに処理される。\par}
+\filler
+\begin{figure*}[span=2,at=tl]
+\demo{22mm}{\code{[span=2,at=tl]}\quad 第1段側・段頭から2段抜き}
+\caption{左上からの2段抜き}\label{fig:tl}
+\end{figure*}
+\begin{figure*}[span=2,at=br]
+\demo{22mm}{\code{[span=2,at=br]}\quad 最終段側・段末から2段抜き}
+\caption{右下からの2段抜き}\label{fig:br}
+\end{figure*}
+\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler\filler
+\end{document}

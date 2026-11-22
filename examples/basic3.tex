@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage[columns=3]{ncolumn}
+\usepackage{lipsum}
+\setlength\columnseprule{.4pt}
+\pagestyle{headings}
+\begin{document}
+\section{First}
+\lipsum[1-4]
+\begin{figure}[t]\centering\rule{.8\linewidth}{2cm}\caption{column float}\end{figure}
+\lipsum[5-7]\footnote{A footnote in some column.}
+\begin{figure*}[t]\centering\rule{.8\linewidth}{3cm}\caption{full span top}\end{figure*}
+\section{Second}
+\lipsum[8-14]
+\begin{figure*}[b]\centering\rule{.8\linewidth}{2cm}\caption{full span bottom}\end{figure*}
+\lipsum[15-22]
+\begin{figure*}[span=2,at=tl]\centering\rule{.8\linewidth}{3cm}\caption{2 columns, top left}\end{figure*}
+\begin{figure*}[span=2,at=br]\centering\rule{.8\linewidth}{3cm}\caption{2 columns, bottom right}\end{figure*}
+\lipsum[23-40]
+\begin{figure*}[span=1,at=tr]\centering\rule{.8\linewidth}{3cm}\caption{1 column, top right}\end{figure*}
+\begin{figure*}[span=2,at=bl]\centering\rule{.8\linewidth}{3cm}\caption{2 columns, bottom left}\end{figure*}
+\lipsum[41-60]
+\spanblock[span=3,at=tl]{\section{A heading across three columns}\bigskip}
+\lipsum[1-6]
+\spanblock*[span=2,at=tr]{\fbox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{A boxed note set across two columns, queued like a float.\par\lipsum[2]}}}
+\lipsum[7-20]
+\end{document}

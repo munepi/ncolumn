@@ -1,0 +1,19 @@
+page 1: N=4 fnres=0.0pt
+  col 1: top=0.0pt bot=60.0pt marks=[a]..[a]
+  col 2: top=0.0pt bot=60.0pt marks=[a]..[a]
+  col 3: top=70.0pt bot=0.0pt marks=[a]..[a]
+  col 4: top=70.0pt bot=0.0pt marks=[b]..[b]
+  span: top from column 3, 2 wide, at 0.0pt
+  span: bot from column 1, 2 wide, at 0.0pt
+page 2: N=4 fnres=0.0pt
+  col 1: top=50.0pt bot=50.0pt marks=[b]..[b]
+  col 2: top=50.0pt bot=50.0pt marks=[b]..[b]
+  col 3: top=0.0pt bot=50.0pt marks=[b]..[b]
+  col 4: top=0.0pt bot=50.0pt marks=[b]..[b]
+  span: top from column 1, 2 wide, at 0.0pt
+  span: bot from column 1, 4 wide, at 0.0pt
+page 3: N=4 fnres=0.0pt
+  col 1: top=0.0pt bot=0.0pt marks=[b]..[b]
+  col 2: top=0.0pt bot=0.0pt marks=[b]..[b]
+  col 3: top=0.0pt bot=0.0pt marks=[b]..[b]
+  col 4: top=0.0pt bot=0.0pt marks=[b]..[b]

@@ -1,0 +1,9 @@
+build/
+tests/compat/build/
+*.aux
+*.log
+*.out
+*.dvi
+*.synctex.gz
+examples/*.pdf
+ncolumn-doc.pdf

@@ -1,0 +1,17 @@
+\usepackage[a4paper,margin=18mm]{geometry}
+\usepackage{lipsum}
+\setlength\columnseprule{.4pt}
+\newcounter{fnx}
+\newcommand\fn{\stepcounter{fnx}\footnote{Note \thefnx: \lipsum[2][1-2]}}
+\begin{document}
+\section{Footnotes}
+\lipsum[1]\fn \lipsum[2-4]\fn \lipsum[5-6]\fn
+\begin{figure}[b]\centering\rule{.8\linewidth}{2cm}\caption{column float}\end{figure}
+\lipsum[7-9]\fn \lipsum[10-12]\fn
+\begin{figure*}[b]\centering\rule{.8\linewidth}{2cm}\caption{full span bottom}\end{figure*}
+\lipsum[13-20]\fn \lipsum[21-24]\fn\fn \lipsum[25-30]
+\begin{figure*}[span=2,at=br]\centering\rule{.8\linewidth}{3cm}\caption{2 columns, bottom right}\end{figure*}
+\lipsum[31-36]\fn \lipsum[37-44]\fn \lipsum[45-50]
+\clearpage
+Short page\fn\ with a note in the first column only.
+\end{document}

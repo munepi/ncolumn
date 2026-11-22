@@ -1,0 +1,23 @@
+% Footnotes carried to the last column.
+\input{regression-test}
+\OMIT
+\documentclass{article}
+\usepackage[columns=3,footnotes=last-column]{ncolumn}
+\usepackage{ncol-test}
+\newcommand\fn{\footnote{\MK{fn\thefootnote}note}}
+\ExplSyntaxOn
+\AddToHook { shipout / before }
+  { \iow_log:e { FOOTINS~void:~ \box_if_empty:NTF \footins { yes } { no } ,~carried:~ \box_if_empty:NTF \g__ncol_fn_box { no } { yes } } }
+\ExplSyntaxOff
+\begin{document}
+\START
+\OMIT
+\MK{a}\LN{10}\fn\LN{30}\fn\LN{50}\MK{b}\fn\LN{60}\fn\fn\LN{100}\fn
+\FL{figure}[p]{500pt}\FL{figure}[p]{500pt}\FL{figure}[p]{500pt}
+\LN{40}\fn\LN{10}
+\clearpage
+x\fn
+\clearpage
+\TIMO
+\SHOWPAGES
+\END

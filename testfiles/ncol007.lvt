@@ -1,0 +1,30 @@
+% Vertical writing where the engine has it (pLaTeX, upLaTeX, LuaTeX-ja);
+% horizontal elsewhere.  Spans, column floats, footnotes in the last column.
+\input{regression-test}
+\OMIT
+\ifdefined\directlua
+  \documentclass{ltjtarticle}
+\else\ifdefined\ucs
+  \documentclass{utarticle}
+\else\ifdefined\kanjiskip
+  \documentclass{tarticle}
+\else
+  \documentclass{article}
+\fi\fi\fi
+\usepackage[columns=3,footnotes=last-column]{ncolumn}
+\usepackage{ncol-test}
+\newcommand\fn{\footnote{\MK{fn\thefootnote}note}}
+\begin{document}
+\START
+\OMIT
+\MK{a}\LN{10}\fn\LN{20}\FL{figure}[t]{20pt}\LN{30}\fn
+\FL{figure*}[t]{40pt}\FL{figure*}[b]{30pt}
+\LN{60}\MK{b}\fn
+\FL{figure*}[span=2,at=tl]{50pt}\FL{figure*}[span=2,at=br]{50pt}
+\LN{90}\MK{c}\fn
+\spanblock[span=2,at=tl]{\LN{2}}
+\MK{d}\LN{20}\fn
+\clearpage
+\TIMO
+\SHOWPAGES
+\END

@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage[a4paper,margin=20mm,marginparwidth=14mm,marginparsep=3mm]{geometry}
+\usepackage[columns=4,same-page-spans]{ncolumn}
+\usepackage{lipsum}
+\setlength\columnseprule{.4pt}
+\newcommand\blk[1]{\centering\fbox{\parbox[c][#1][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\centering fig \thefigure}}}
+\begin{document}
+\section{Same page}
+\lipsum[1]\marginpar{\tiny from col 1}
+\begin{figure*}[span=2,at=tr]\blk{3cm}\caption{declared in column 1: top right, same page}\end{figure*}
+\begin{figure*}[span=2,at=bl]\blk{2cm}\caption{declared in column 1: bottom left, same page}\end{figure*}
+\lipsum[2-8]\marginpar{\tiny from col 2}\lipsum[9-12]\marginpar{\tiny from col 3}
+\begin{figure*}[span=2,at=br]\blk{2cm}\caption{declared late: bottom right}\end{figure*}
+\lipsum[13-20]\marginpar{\tiny from col 4}
+\begin{figure*}[b]\blk{2cm}\caption{full span bottom}\end{figure*}
+\lipsum[21-50]\marginpar{\tiny A}\marginpar{\tiny B}\lipsum[51-60]
+\end{document}
