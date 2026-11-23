@@ -1,0 +1,54 @@
+%% test-samepage.tex
+%% =================
+%% Typesetting test for every engine: spanning floats on the page
+%% where they are met (same-page-spans).
+%%
+%%   pdflatex test-samepage.tex   (or xelatex / lualatex / platex / uplatex)
+%% The class is article: the expected state depends on its layout.
+%%
+%% What is covered, in four columns:
+%%   * a float met in the first column for the top of the third and
+%%     the fourth column, which are not begun: this page;
+%%   * a float for the bottom of the first two columns, met in the
+%%     first column, which has room: this page;
+%%   * a float for the top of the first two columns, met in the first
+%%     column: the next page;
+%%   * a float across all columns at the bottom, met in the last
+%%     column: the next page.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK, and no error.
+\documentclass{article}
+\usepackage[columns=4,same-page-spans]{ncolumn}
+\input{test-common}
+\NCOLexpect{
+  {page 1: N=4 fnres=0pt}
+    {col 1: top=0.0pt bot=60.0pt marks=[a]..[a]}
+    {col 2: top=0.0pt bot=60.0pt marks=[a]..[a]}
+    {col 3: top=70.0pt bot=0.0pt marks=[a]..[a]}
+    {col 4: top=70.0pt bot=0.0pt marks=[b]..[b]}
+    {span: top from column 3, 2 wide, at 0.0pt}
+    {span: bot from column 1, 2 wide, at 0.0pt}
+  {page 2: N=4 fnres=0pt}
+    {col 1: top=50.0pt bot=50.0pt marks=[b]..[b]}
+    {col 2: top=50.0pt bot=50.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=50.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=50.0pt marks=[b]..[b]}
+    {span: top from column 1, 2 wide, at 0.0pt}
+    {span: bot from column 1, 4 wide, at 0.0pt}
+  {page 3: N=4 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=0.0pt marks=[b]..[b]}
+}
+\begin{document}
+\NCOLmark{a}\NCOLlines{10}
+\NCOLfloat{figure*}[span=2,at=tr]{50pt}% columns 3-4 are not begun: this page
+\NCOLfloat{figure*}[span=2,at=bl]{40pt}% begins in the current column: this page
+\NCOLfloat{figure*}[span=2,at=tl]{30pt}% column 1 is in use: next page
+\NCOLlines{150}\NCOLmark{b}
+\NCOLfloat{figure*}[b]{30pt}% met in column 4: next page
+\NCOLlines{200}
+\clearpage
+\end{document}

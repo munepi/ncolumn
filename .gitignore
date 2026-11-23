@@ -1,9 +1,13 @@
-build/
-tests/compat/build/
 *.aux
 *.log
 *.out
+*.toc
 *.dvi
+*.xdv
 *.synctex.gz
-examples/*.pdf
-ncolumn-doc.pdf
+*.term
+test-*.pdf
+test-*.png
+ncolumn.zip
+*~
+.DS_Store

@@ -1,0 +1,64 @@
+%% test-footnote-span.tex
+%% ======================
+%% Typesetting test for every engine: the footnotes of a page in an
+%% area of two columns across the four columns of the page
+%% (footnotes=span, footnote-columns=2).
+%%
+%%   pdflatex test-footnote-span.tex   (or xelatex / lualatex / platex /
+%%   uplatex), until there is no "Rerun" warning of ncolumn
+%% The height of the footnote area of each page is taken from the
+%% .aux file of the run before.  The class is article: the expected
+%% state depends on its layout.
+%%
+%% What is covered:
+%%   * pages with one footnote and with several footnotes, in
+%%     different columns;
+%%   * a float across all columns at the bottom, above the footnote
+%%     area;
+%%   * a page that ends with \clearpage in its first column.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK (every footnote text is on the page of its
+%%     mark), no error and, after the last run, no warning of ncolumn;
+%%   * in the PDF, the footnotes are at the bottom of the page in two
+%%     columns of the same height, and the text does not overlap them.
+\documentclass{article}
+\usepackage[columns=4,footnotes=span,footnote-columns=2]{ncolumn}
+\input{test-common}
+\newcommand\fn{\NCOLfootnote{note \NCOLlines{1}}}
+\NCOLexpect{
+  {page 1: N=4 fnres=38pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 2: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 3: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 4: top=0.0pt bot=0.0pt marks=[a]..[a]}
+  {page 2: N=4 fnres=35pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=0.0pt marks=[b]..[b]}
+  {page 3: N=4 fnres=54pt}
+    {col 1: top=0.0pt bot=60.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=60.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=60.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=60.0pt marks=[b]..[b]}
+    {span: bot from column 1, 4 wide, at 0.0pt}
+  {page 4: N=4 fnres=54pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=0.0pt marks=[b]..[b]}
+  {page 5: N=4 fnres=19pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 4: top=0.0pt bot=0.0pt marks=[b]..[b]}
+}
+\begin{document}
+\NCOLmark{a}\NCOLlines{20}\fn\NCOLlines{60}\fn\fn\NCOLlines{90}\NCOLmark{b}\fn\NCOLlines{120}\fn
+\NCOLfloat{figure*}[b]{40pt}
+\NCOLlines{200}\fn\NCOLlines{30}\fn\fn\fn\NCOLlines{40}
+\clearpage
+x\fn
+\clearpage
+\end{document}

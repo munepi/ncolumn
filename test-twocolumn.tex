@@ -1,3 +1,27 @@
+%% test-twocolumn.tex
+%% ==================
+%% Typesetting test for every engine: with two columns, the pages are
+%% the same as those of \twocolumn of the LaTeX kernel.
+%%
+%%   pdflatex test-twocolumn.tex
+%%   pdflatex -jobname=test-twocolumn-off "\def\NCOLoff{1}\input test-twocolumn"
+%% With \NCOLoff, ncolumn is not loaded.
+%%
+%% What is covered:
+%%   * \maketitle and an abstract in twocolumn, running heads, a rule
+%%     between the columns;
+%%   * floats of one column (t, b, htbp), figure* and table* (t, p and
+%%     the default), a float page;
+%%   * footnotes, \marginpar, \enlargethispage;
+%%   * \clearpage with a figure* that waits, \twocolumn[...],
+%%     \onecolumn with a figure*, \twocolumn.
+%%
+%% What to check:
+%%   * no error;
+%%   * every page of the PDF is the same, pixel by pixel, with and
+%%     without \NCOLoff (pdftoppm and cmp; see the Makefile).
+\documentclass[twocolumn]{article}
+\ifdefined\NCOLoff\else\usepackage{ncolumn}\fi
 \usepackage{lipsum}
 \setlength\columnseprule{.4pt}
 \pagestyle{headings}

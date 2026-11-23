@@ -1,0 +1,59 @@
+%% test-japanese.tex
+%% =================
+%% Typesetting test with the Japanese classes, in horizontal (yoko)
+%% and in vertical (tate) writing: a document with real text, to be
+%% looked at.
+%%
+%%   platex  test-japanese.tex && dvipdfmx test-japanese
+%%   lualatex test-japanese.tex
+%%   lualatex -jobname=test-japanese-jlreq-tate \
+%%     "\def\CLS{jlreq}\def\CLSOPT{tate}\input test-japanese"
+%% The class is jsarticle (with the option dvipdfmx) with pTeX and
+%% ltjsarticle with LuaTeX by default; set \CLS and \CLSOPT for
+%% another one.  \NCOLopt is the list of the package options
+%% (default: columns=3).  With footnotes=span, run until there is no
+%% "Rerun" warning of ncolumn.
+%%
+%% What is covered:
+%%   * section headings, a float of one column, floats across all
+%%     columns and across two columns (at=tl, at=br), with captions;
+%%   * \spanblock with a section heading across all columns;
+%%   * footnotes.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK (every footnote text is on the page of its
+%%     mark), no error and, after the last run, no warning of ncolumn
+%%     (but the one on stfloats, which jlreq loads with LuaTeX);
+%%   * in the PDF in tate, the first column is the upper one and the
+%%     top of a column is on the right.
+\ifdefined\ptexversion
+  \ifdefined\CLS\else\def\CLS{jsarticle}\fi
+  \ifdefined\CLSOPT\else\def\CLSOPT{dvipdfmx}\fi
+\else
+  \ifdefined\CLS\else\def\CLS{ltjsarticle}\fi
+  \ifdefined\CLSOPT\else\def\CLSOPT{}\fi
+\fi
+\ifdefined\NCOLopt\else\def\NCOLopt{columns=3}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+\expandafter\usepackage\expandafter[\NCOLopt]{ncolumn}
+\input{test-common}
+\newcommand\jatext{吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。吾輩はここで始めて人間というものを見た。しかもあとで聞くとそれは書生という人間中で一番獰悪な種族であったそうだ。この書生というのは時々我々を捕えて煮て食うという話である。しかしその当時は何という考もなかったから別段恐しいとも思わなかった。\par}
+\newcommand\jatexts[1]{\count255=0 \loop\ifnum\count255<#1 \jatext\advance\count255 1 \repeat}
+\newcounter{fnx}
+\newcommand\fn{\stepcounter{fnx}\NCOLfootnote{脚注\thefnx。ただ彼の掌に載せられてスーと持ち上げられた時何だかフワフワした感じがあったばかりである。}}
+\newcommand\blk[2]{\rule{#1}{#2}}
+\setlength\columnseprule{.4pt}
+\begin{document}
+\section{はじめに}
+\jatexts{2}\fn \jatexts{3}\fn
+\begin{figure}[t]\centering\blk{.8\linewidth}{15mm}\caption{段幅の図}\end{figure}
+\jatexts{4}\fn
+\begin{figure*}[t]\centering\blk{.8\linewidth}{20mm}\caption{全段抜き(段頭側)}\end{figure*}
+\section{つづき}
+\jatexts{12}\fn
+\begin{figure*}[span=2,at=tl]\centering\blk{.8\linewidth}{20mm}\caption{2段抜きtl}\end{figure*}
+\begin{figure*}[span=2,at=br]\centering\blk{.8\linewidth}{20mm}\caption{2段抜きbr}\end{figure*}
+\jatexts{14}\fn\fn
+\spanblock[span=3,at=tl]{\section{段抜きの大見出し}\bigskip}
+\jatexts{10}\fn
+\end{document}

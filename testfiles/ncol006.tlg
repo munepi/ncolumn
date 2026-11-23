@@ -1,4 +1,0 @@
-page 1: top=[] first=[A1] last=[C1] rightmark=[A1] col1=[A1] col3=[C1]
-page 2: top=[C1] first=[E1] last=[E1] rightmark=[E1] col1=[C1] col3=[E1]
-page 3: top=[E1] first=[I1] last=[I1] rightmark=[I1] col1=[E1] col3=[I1]
-page 4: top=[I1] first=[I1] last=[I1] rightmark=[I1] col1=[I1] col3=[I1]

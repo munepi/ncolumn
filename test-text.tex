@@ -1,0 +1,85 @@
+%% test-text.tex
+%% =============
+%% Typesetting test for every engine: a document with real text, to be
+%% looked at.
+%%
+%%   pdflatex test-text.tex   (or xelatex / lualatex)
+%%   platex  test-text.tex && dvipdfmx test-text
+%%   pdflatex -jobname=test-text-span \
+%%     "\def\NCOLopt{columns=3,footnotes=span}\input test-text"
+%% The class is article by default; set \CLS for another one.  With
+%% pTeX the class option dvipdfmx is given.  \NCOLopt is the list of
+%% the package options (default: columns=3).  With footnotes=span, run
+%% until there is no "Rerun" warning of ncolumn.
+%%
+%% What is covered:
+%%   * sections, running heads, a rule between the columns;
+%%   * floats of one column, floats across all columns (t and b),
+%%     floats across one and two columns from each of the four
+%%     corners, with captions;
+%%   * \spanblock with a section heading across all columns, and
+%%     \spanblock* with a framed text;
+%%   * footnotes in every column, with each way of placing them;
+%%   * four columns with same-page-spans, and \marginpar in each of
+%%     the four columns;
+%%   * a last page with text and a footnote in its first column only.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK (every footnote text is on the page of its
+%%     mark), no error and, after the last run, no warning of ncolumn;
+%%   * in the PDF, the spanning material is in the corner that its
+%%     caption names and no text overlaps it; the rule between two
+%%     columns stops at the spanning material; the footnotes are
+%%     where \NCOLopt puts them; the marginal notes of the first two
+%%     columns are in the left margin and those of the last two in the
+%%     right margin, and none overlaps another.
+\ifdefined\CLS\else\def\CLS{article}\fi
+\ifdefined\ptexversion\def\CLSOPT{dvipdfmx}\else\def\CLSOPT{}\fi
+\ifdefined\NCOLopt\else\def\NCOLopt{columns=3}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+\usepackage[a4paper,margin=20mm,marginparwidth=14mm,marginparsep=3mm]{geometry}
+\expandafter\usepackage\expandafter[\NCOLopt]{ncolumn}
+\usepackage{lipsum}
+\input{test-common}
+\setlength\columnseprule{.4pt}
+\pagestyle{headings}
+\newcounter{fnx}
+\newcommand\fn{\stepcounter{fnx}\NCOLfootnote{Note \thefnx: \lipsum[2][1-2]}}
+\newcommand\blk[1]{\centering\rule{.8\linewidth}{#1}}
+\begin{document}
+\section{Floats}
+\lipsum[1]\fn \lipsum[2-4]\fn
+\begin{figure}[t]\blk{2cm}\caption{one column, top}\end{figure}
+\lipsum[5-7]\fn
+\begin{figure*}[t]\blk{3cm}\caption{all columns, top}\end{figure*}
+\begin{figure}[b]\blk{2cm}\caption{one column, bottom}\end{figure}
+\section{Spanning floats}
+\lipsum[8-14]\fn
+\begin{figure*}[b]\blk{2cm}\caption{all columns, bottom}\end{figure*}
+\lipsum[15-22]\fn
+\begin{figure*}[span=2,at=tl]\blk{3cm}\caption{two columns, top left (tl)}\end{figure*}
+\begin{figure*}[span=2,at=br]\blk{3cm}\caption{two columns, bottom right (br)}\end{figure*}
+\lipsum[23-34]\fn\fn \lipsum[35-40]
+\begin{figure*}[span=1,at=tr]\blk{3cm}\caption{one column, top right (tr)}\end{figure*}
+\begin{figure*}[span=2,at=bl]\blk{3cm}\caption{two columns, bottom left (bl)}\end{figure*}
+\lipsum[41-52]\fn \lipsum[53-60]
+\spanblock[span=3,at=tl]{\section{A heading across three columns}\bigskip}
+\lipsum[1-6]\fn
+\spanblock*[span=2,at=tr]{\fbox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+  A framed text across two columns, which is put on a later page like
+  a float.\par\lipsum[2]}}}
+\lipsum[7-20]
+
+\ncolumn{4}[{\section{Four columns}\bigskip}]
+\ncolumnsetup{same-page-spans}
+\lipsum[1]\marginpar{\tiny from column 1}
+\begin{figure*}[span=2,at=tr]\blk{3cm}\caption{met in column 1: top right, this page}\end{figure*}
+\begin{figure*}[span=2,at=bl]\blk{2cm}\caption{met in column 1: bottom left, this page}\end{figure*}
+\lipsum[2-8]\marginpar{\tiny from column 2}\fn \lipsum[9-12]\marginpar{\tiny from column 3}
+\begin{figure*}[span=2,at=br]\blk{2cm}\caption{met later: bottom right}\end{figure*}
+\lipsum[13-20]\marginpar{\tiny from column 4}\fn
+\begin{figure*}[b]\blk{2cm}\caption{all columns, bottom}\end{figure*}
+\lipsum[21-50]\marginpar{\tiny A}\marginpar{\tiny B}\lipsum[51-60]
+\clearpage
+A short page\fn\ with a footnote in its first column only.
+\end{document}

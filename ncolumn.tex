@@ -1,0 +1,364 @@
+%% ncolumn.tex -- documentation for the ncolumn package
+%%
+%% Copyright (c) 2026 Munehiro Yamamoto <munepixyz@gmail.com>
+%% License: LPPL 1.3c or later
+%%
+%% Build: pdflatex ncolumn.tex (twice)
+\documentclass{article}
+\usepackage[margin=28mm]{geometry}
+\usepackage{xcolor}
+\usepackage{ncolumn}
+\usepackage[colorlinks, allcolors=blue!50!black]{hyperref}
+\newcommand*\ncolversion{v0.1 (2026/11/23)}
+\newcommand*\cs[1]{\texttt{\char`\\#1}}
+\newcommand*\pkg[1]{\textsf{#1}}
+\newcommand*\key[1]{\texttt{#1}}
+\newcommand*\meta[1]{$\langle$\textit{#1}$\rangle$}
+\newcommand*\marg[1]{\texttt{\char`\{}#1\texttt{\char`\}}}
+\emergencystretch=2em
+%% \filler{<n>}: <n> filler sentences
+\makeatletter
+\newcommand\filler[1]{%
+  \count@=0
+  \loop\advance\count@ by 1
+    This sentence only fills the column, so that the page is long
+    enough to show where the material goes.
+  \ifnum\count@<#1 \repeat}
+\makeatother
+%% \demo{<height>}{<text>}: a grey box of <height> as a float body
+\newcommand\demo[2]{\centering
+  \fcolorbox{black!40}{black!8}{\parbox[c][#1][c]%
+    {\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\centering\small #2}}}
+
+\title{The \pkg{ncolumn} package\\
+  \large N columns in the way of \cs{twocolumn}, with material that
+  spans columns}
+\author{Munehiro Yamamoto}
+\date{\ncolversion}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\pkg{multicol} collects the material of all columns and splits it into
+the columns afterwards.  Ordinary floats cannot be used in it, and
+packages that look at the room that is left on the page, such as
+\pkg{tcolorbox} with \key{breakable}, need extra care.
+
+\cs{twocolumn} of \LaTeX{} works in another way: it builds the columns
+one after another.  A column is a page for \TeX, and the finished
+columns are put side by side when the last one is done.  So
+\texttt{figure} and \texttt{table}, footnotes, \cs{marginpar} and such
+packages work in it as on a page.
+
+The \pkg{ncolumn} package makes the output routine of \cs{twocolumn}
+work for three, four or more columns, and adds two things:
+\begin{itemize}
+\item \emph{Spanning material.}  Floats, headings and boxes can span
+  $k$ columns from one of the four corners of the page.
+\item \emph{Footnotes.}  The footnotes of a page are put into each
+  column, into the last column, or into an area of $M$ columns across
+  the page.
+\end{itemize}
+With two columns and without the new keys, the pages are those of
+\cs{twocolumn}.  Section~\ref{sec:examples} shows two pages that are
+typeset with the package.
+
+\paragraph{Supported formats/engines}
+pdf\LaTeX, Xe\LaTeX, Lua\LaTeX{} (with or without Lua\TeX-ja),
+p\LaTeX{} and up\LaTeX{} (with dvipdfmx); horizontal (yoko) and
+vertical (tate) writing.  The package requires \LaTeX{} 2025-06-01 or
+later.
+
+\section{Usage}
+
+\begin{verbatim}
+\documentclass{article}
+\usepackage[columns=3]{ncolumn}
+\end{verbatim}
+\key{columns=}\meta{N} sets the whole document in \meta{N} columns.
+If the package is loaded without \key{columns} in a document whose
+class has the option \key{twocolumn}, the document has two columns as
+before.
+
+\subsection{Changing the number of columns}
+
+\begin{verbatim}
+\ncolumn{4}
+\ncolumn{3}[\section{A heading across all columns}]
+\onecolumn
+\twocolumn
+\end{verbatim}
+\cs{ncolumn}\marg{\meta{N}} starts a new page with
+\meta{N} columns.  The material in its optional argument is put across
+all columns at the top of this page, as with \cs{twocolumn}.
+\cs{twocolumn} does not mean ``two columns'' but ``the columns of this
+document'': it goes back to the number of columns that was used
+before.  The classes call it after \cs{maketitle} or an index to go
+back to the columns.
+
+\subsection{Spanning floats}
+
+\begin{verbatim}
+\begin{figure*}[t]               % all columns, at the top
+\begin{figure*}[b]               % all columns, at the bottom
+\begin{figure*}[span=2,at=tl]    % two columns from the first one, top
+\begin{figure*}[span=2,at=br]    % two columns up to the last one, bottom
+\begin{figure*}[!,span=2,at=tr]  % ! as for ordinary floats
+\end{verbatim}
+An argument of \texttt{figure*} or \texttt{table*} with a \texttt{=}
+is read as a list of keys.  \key{span} is the number of columns and
+\key{at} is the corner: \key{tl}, \key{tr}, \key{bl} or \key{br}.
+\texttt{[b]}, which \LaTeX{} does not allow for these floats, puts a
+float across all columns at the bottom.
+
+The corner is given in the directions of the text: \key{t} and \key{b}
+are the top and the bottom of a column, \key{l} and \key{r} are the
+side of the first and of the last column.  In yoko this is what it
+looks like.  In tate the first column is the upper one and the top of
+a column is on the right, so \key{tl} is the upper right corner of
+the page.
+
+A page can have several pieces of spanning material.  A piece is put
+on a page only if the columns it covers have the same height reserved
+so far; otherwise it would leave a hole, and it goes to the next page.
+
+As in \LaTeX, a spanning float is put on a later page than the one
+where it is met.  With the key \key{same-page-spans}, it is put on the
+page where it is met
+\begin{itemize}
+\item at the top, if none of the columns it covers is begun;
+\item at the bottom, if it covers only the current column and columns
+  after it, and the current column has room.
+\end{itemize}
+No spanning float is put at the top of a page that begins with the
+material of \cs{ncolumn}\marg{\meta{N}}\texttt{[...]} or with a
+\cs{spanblock} at the top, as with \cs{twocolumn}\texttt{[...]} in
+\LaTeX.
+
+In one column, \key{span} and \key{at} are ignored and the float is an
+ordinary one.
+
+\subsection{Spanning blocks}
+
+\begin{verbatim}
+\spanblock[span=3,at=tl]{\section{A large heading}}
+\spanblock*[span=2,at=br]{...}
+\end{verbatim}
+\cs{spanblock} puts material that is not a float, such as a heading or
+a \pkg{tcolorbox}, across columns.  Without the star it starts a new
+page and puts the block on it; with the star the block is put on a
+later page, like a float.
+
+\subsection{Footnotes}
+
+\begin{verbatim}
+\usepackage[columns=3,footnotes=last-column]{ncolumn}
+\ncolumnsetup{footnotes=span,footnote-columns=2}
+\end{verbatim}
+The key \key{footnotes} has one of these values:
+\begin{description}
+\item[\key{column}] The footnotes are put at the bottom of the column
+  of their marks, as in \LaTeX{} (default).
+\item[\key{last-column}] All footnotes of a page are put at the bottom
+  of its last column, as \pkg{ftnright} does for two columns.  One run
+  is enough.
+\item[\key{span}] The footnotes are put into an area across all
+  columns at the bottom of the page.  With
+  \key{footnote-columns=}\meta{M}, this area has \meta{M} columns.
+  Several runs are needed.
+\end{description}
+With \key{span}, the columns that are finished cannot be made shorter
+for a footnote of a later column.  So the height of the footnote area
+of each page is written to the \texttt{.aux} file and is taken off all
+columns in the next run.  The package warns to run again when a height
+has changed.
+
+Reserving the room can move the line of the mark to the next page, and
+not reserving it brings it back.  If the package finds this, it keeps
+the room reserved (the page is then shorter by a footnote area that it
+does not have).  Up to about five runs can be needed.
+\key{footnote-reserve=}\meta{length} reserves a fixed height on every
+page and does not use the \texttt{.aux} file.
+
+In tate with \pkg{jlreq}, \key{last-column} is the default, as
+\pkg{jlreq} puts the footnotes at the bottom of the last column.
+
+\subsection{Marginal notes}
+
+With three or more columns, a \cs{marginpar} goes to the nearer
+margin: to the margin on the side of the first column from the first
+half of the columns, to the other margin from the second half.  The
+notes of columns that share a margin do not overlap.
+
+\subsection{Options and parameters}
+
+\begin{center}
+\begin{tabular}{@{}lp{95mm}@{}}
+\hline
+\key{columns=}\meta{N} & the number of columns of the document
+  (\cs{usepackage} only) \\
+\key{footnotes=}\meta{value} & where the footnotes are put:
+  \key{column}, \key{last-column} or \key{span} \\
+\key{footnote-columns=}\meta{M} & the columns of the footnote area
+  with \key{span} \\
+\key{footnote-reserve=}\meta{length} & a fixed height of the footnote
+  area with \key{span} \\
+\key{same-page-spans} & put spanning floats on the page where they are
+  met, if possible \\
+\hline
+\end{tabular}
+\end{center}
+The keys are given to \cs{usepackage} or, but \key{columns}, to
+\cs{ncolumnsetup}.
+
+The parameters of \LaTeX{} for two columns are used as they are:
+\cs{columnsep}, \cs{columnseprule}, \texttt{dbltopnumber},
+\cs{dbltopfraction}, \cs{dblfloatsep}, \cs{dbltextfloatsep} and
+\cs{dblfigrule}.  For spanning material at the bottom, there are the
+counter \texttt{dblbotnumber} (default 2) and \cs{dblbotfraction}
+(default 0.5).
+
+\section{Examples}\label{sec:examples}
+
+The next two pages are typeset with \key{same-page-spans} and with a
+rule between the columns (\cs{columnseprule}).
+\begin{itemize}
+\item The first page has three columns.  Figure~\ref{fig:col} is an
+  ordinary \texttt{figure} with \texttt{[t]}.  Figure~\ref{fig:tr} is
+  a \texttt{figure*} with \texttt{[span=2,at=tr]} and
+  Figure~\ref{fig:bl} one with \texttt{[span=2,at=bl]}; both are given
+  at the beginning of the first column.  The footnotes are at the
+  bottom of their columns (\key{footnotes=column}).
+\item The second page has four columns.  The text with the frame is a
+  \cs{spanblock*} with \texttt{[span=2,at=tr]} and Figure~\ref{fig:b}
+  is a \texttt{figure*} with \texttt{[b]}; both are given at the
+  beginning of the first column.  All footnotes of the page are in its
+  last column (\key{footnotes=last-column}).
+\end{itemize}
+
+%% ------------------------------------------------------------------
+\ncolumn{3}
+\ncolumnsetup{same-page-spans}
+\setlength\columnseprule{.4pt}
+\begin{figure}[t]
+\demo{12mm}{\texttt{figure} with \texttt{[t]}}
+\caption{A float of one column}\label{fig:col}
+\end{figure}
+\begin{figure*}[span=2,at=tr]
+\demo{20mm}{\texttt{[span=2,at=tr]}: two columns up to the last one,
+  at the top}
+\caption{Two columns from the top right corner}\label{fig:tr}
+\end{figure*}
+\begin{figure*}[span=2,at=bl]
+\demo{20mm}{\texttt{[span=2,at=bl]}: two columns from the first one,
+  at the bottom}
+\caption{Two columns from the bottom left corner}\label{fig:bl}
+\end{figure*}
+\filler{4}\footnote{A footnote of the first column.}
+\filler{22}\footnote{A footnote of a later column.}
+\filler{10}
+
+\ncolumn{4}
+\ncolumnsetup{footnotes=last-column}
+\spanblock*[span=2,at=tr]{\fbox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+  \small\textbf{A block across two columns.}  \cs{spanblock} takes
+  material that is not a float: a heading, a framed text like this
+  one, or a \pkg{tcolorbox}.}}}
+\begin{figure*}[b]
+\demo{14mm}{\texttt{[b]}: all columns, at the bottom}
+\caption{All columns at the bottom}\label{fig:b}
+\end{figure*}
+\filler{3}\footnote{A footnote from the first column.}
+\filler{12}\footnote{A footnote from a later column.}
+\filler{24}
+
+\onecolumn
+\setlength\columnseprule{0pt}
+
+\section{How it works}
+
+\begin{enumerate}
+\item \emph{N columns.}  \cs{@outputdblcol} keeps the finished columns
+  in $N$ boxes instead of one.  \cs{if@twocolumn} stays true and
+  \cs{if@firstcolumn} is true in the first column only, so code that
+  tests them works as before.
+\item \emph{Spanning material.}  Each column has a height that is
+  reserved at its top and one at its bottom, and the height of the
+  column (\cs{@colht}) is set for each column.  The spanning material
+  is laid over the columns when the page is put together.
+\item \emph{Footnotes.}  \cs{@makecol} and \cs{@outputpage} are not
+  redefined: p\LaTeX{} has its own versions for tate, Lua\TeX-ja uses
+  their hooks, and so does the tagging code of \LaTeX{}
+  (\cs{DocumentMetadata}).  The package takes \verb|\box\footins| at
+  the beginning of \cs{output} instead.
+\item \emph{Marks.}  The code of \texttt{ltmarks} that updates the
+  marks for two columns is replaced by one for $N$ columns (the marks
+  of each column are also in the regions \texttt{mcol-1},
+  \texttt{mcol-2}, \ldots).  This is the only place where internal
+  variables of another module are used.
+\end{enumerate}
+The internal macros of \LaTeX{} that are redefined or wrapped are
+listed at the top of \texttt{ncolumn.sty}.
+
+\section{Limitations}
+
+\begin{itemize}
+\item Material spans columns from the corners of the page only.  It
+  cannot be put in the middle of a page with text above and below it:
+  the columns would have to be balanced for that.  The columns of the
+  last page are not balanced either.
+\item When the floats are put out by \cs{clearpage}, a float that
+  spans some of the columns is not put into its corner but on a float
+  page, at the side of the first or of the last column.
+\item With \key{footnotes=span}, a footnote is not split across pages.
+\item A footnote inside spanning material is not typeset, as in an
+  ordinary float.
+\item In tate with \pkg{jlreq}, \key{footnotes=column} and
+  \key{footnotes=span} do not work with the code of \pkg{jlreq} for
+  its notes, which is written for two columns.  Use \key{last-column}.
+\item These packages redefine the same macros; loading one of them
+  with \pkg{ncolumn} is an error: \pkg{ftnright}, \pkg{nidanfloat},
+  \pkg{dblfloatfix}, \pkg{cuted}, \pkg{balance}, \pkg{flushend},
+  \pkg{pbalance}, \pkg{flowfram}, \pkg{dblfnote}.  \pkg{stfloats}
+  gives a warning only, as \pkg{jlreq} loads it with Lua\LaTeX;
+  \pkg{ncolumn} replaces its placement of the spanning floats.
+\end{itemize}
+
+\section{Tests}
+
+\texttt{make test} compiles the test files \texttt{test-*.tex} with
+pdf\LaTeX, Xe\LaTeX, Lua\LaTeX, p\LaTeX{} and up\LaTeX.  For each page
+that is shipped out, \texttt{test-common.tex} records the state of the
+package: the heights that are reserved at the top and at the bottom of
+each column, the spanning material, and the first and the last mark of
+each column.  At \verb|\end{document}| it compares this with the state
+that the test file expects, reads the \texttt{.aux} file back and
+checks that every footnote text is on the page of its mark, and writes
+\texttt{NCOL-RESULT OK} or \texttt{NCOL-RESULT NG} to the log.
+
+\texttt{test-twocolumn.tex} is compiled with and without the package:
+with two columns, every page is the same, pixel by pixel, as with
+\cs{twocolumn} of the \LaTeX{} kernel.  \texttt{test-text.tex},
+\texttt{test-japanese.tex} (yoko and tate) and
+\texttt{test-tcolorbox.tex} are documents with real text that are also
+meant to be looked at.  See \texttt{README.md} for the list of the
+tests.
+
+\section{History}
+
+\begin{description}
+\item[v0.1 (2026/11/23)] First version.
+\end{description}
+
+\section{License}
+
+Copyright \copyright\ 2026 Munehiro Yamamoto.
+
+This package is licensed under the conditions of the \LaTeX{} Project
+Public License, either version 1.3c of this license or (at your
+option) any later version.  The latest version of this license is in
+\url{https://www.latex-project.org/lppl.txt}.
+
+\end{document}

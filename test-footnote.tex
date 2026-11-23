@@ -1,0 +1,55 @@
+%% test-footnote.tex
+%% =================
+%% Typesetting test for every engine: the footnotes of a page in its
+%% last column (footnotes=last-column).
+%%
+%%   pdflatex test-footnote.tex   (or xelatex / lualatex / platex / uplatex)
+%% The class is article: the expected state depends on its layout.
+%%
+%% What is covered:
+%%   * footnotes in the first, the second and the last of three
+%%     columns: all are put into the last column (each footnote text
+%%     has a mark fn<number>, which is then a mark of the last column);
+%%   * float pages between two pages of text;
+%%   * a page that ends with \clearpage in its first column.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK (every footnote text is on the page of its
+%%     mark), and no error;
+%%   * in the PDF, the footnotes are at the bottom of the last column
+%%     only.
+\documentclass{article}
+\usepackage[columns=3,footnotes=last-column]{ncolumn}
+\input{test-common}
+\newcommand\fn{\NCOLfootnote{\NCOLmark{fn\thefootnote}note}}
+\NCOLexpect{
+  {page 1: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 3: top=0.0pt bot=0.0pt marks=[fn1]..[fn3]}
+  {page 2: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[fn3]..[fn3]}
+    {col 2: top=0.0pt bot=0.0pt marks=[fn3]..[fn3]}
+    {col 3: top=0.0pt bot=0.0pt marks=[fn4]..[fn6]}
+  {page 3: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[fn6]..[fn6]}
+    {col 2: top=0.0pt bot=0.0pt marks=[fn6]..[fn6]}
+    {col 3: top=0.0pt bot=0.0pt marks=[fn6]..[fn6]}
+  {page 4: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[fn6]..[fn6]}
+    {col 2: top=0.0pt bot=0.0pt marks=[fn6]..[fn6]}
+    {col 3: top=0.0pt bot=0.0pt marks=[fn7]..[fn7]}
+  {page 5: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[fn7]..[fn7]}
+    {col 2: top=0.0pt bot=0.0pt marks=[fn7]..[fn7]}
+    {col 3: top=0.0pt bot=0.0pt marks=[fn8]..[fn8]}
+}
+\begin{document}
+\NCOLmark{a}\NCOLlines{10}\fn\NCOLlines{30}\fn\NCOLlines{50}\NCOLmark{b}\fn
+\NCOLlines{60}\fn\fn\NCOLlines{100}\fn
+\NCOLfloat{figure}[p]{500pt}\NCOLfloat{figure}[p]{500pt}\NCOLfloat{figure}[p]{500pt}
+\NCOLlines{40}\fn\NCOLlines{10}
+\clearpage
+x\fn
+\clearpage
+\end{document}

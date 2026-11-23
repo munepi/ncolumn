@@ -1,0 +1,92 @@
+%% test-basic.tex
+%% ==============
+%% Typesetting test for every engine: three columns with floats of one
+%% column and spanning floats.
+%%
+%%   pdflatex test-basic.tex   (or xelatex / lualatex / platex / uplatex)
+%% The class is article: the expected state depends on its layout.
+%%
+%% What is covered:
+%%   * text that runs through three columns, a float of one column;
+%%   * a float across all columns at the top and one at the bottom of
+%%     the same page;
+%%   * two floats across two columns on one page: from the first
+%%     column at the top (at=tl), from the last column at the bottom
+%%     (at=br);
+%%   * two floats across two columns at the top, one from each side:
+%%     they would overlap in the second column, so the second one goes
+%%     to the next page;
+%%   * a float that is too high for the top of a page: it waits for
+%%     \clearpage and is put on a float page;
+%%   * the same float with "!": it is put at the top.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK, and no error;
+%%   * in the PDF, the rules of the spanning floats do not overlap the
+%%     lines of the text (there is no visible text: the lines are
+%%     empty boxes).
+\documentclass{article}
+\usepackage[columns=3]{ncolumn}
+\input{test-common}
+\NCOLexpect{
+  {page 1: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[a1]..[a2]}
+    {col 2: top=0.0pt bot=0.0pt marks=[a2]..[a2]}
+    {col 3: top=0.0pt bot=0.0pt marks=[a3]..[a3]}
+  {page 2: N=3 fnres=0pt}
+    {col 1: top=70.0pt bot=60.0pt marks=[a3]..[a3]}
+    {col 2: top=70.0pt bot=60.0pt marks=[a3]..[a3]}
+    {col 3: top=70.0pt bot=60.0pt marks=[b1]..[b1]}
+    {span: top from column 1, 3 wide, at 0.0pt}
+    {span: bot from column 1, 3 wide, at 0.0pt}
+  {page 3: N=3 fnres=0pt}
+    {col 1: top=80.0pt bot=0.0pt marks=[b1]..[b1]}
+    {col 2: top=80.0pt bot=80.0pt marks=[b1]..[b1]}
+    {col 3: top=0.0pt bot=80.0pt marks=[c1]..[c1]}
+    {span: top from column 1, 2 wide, at 0.0pt}
+    {span: bot from column 2, 2 wide, at 0.0pt}
+  {page 4: N=3 fnres=0pt}
+    {col 1: top=50.0pt bot=0.0pt marks=[c1]..[c1]}
+    {col 2: top=50.0pt bot=0.0pt marks=[c1]..[c1]}
+    {col 3: top=0.0pt bot=0.0pt marks=[c1]..[c1]}
+    {span: top from column 1, 2 wide, at 0.0pt}
+  {page 5: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[c1]..[c1]}
+    {col 2: top=50.0pt bot=0.0pt marks=[d1]..[d1]}
+    {col 3: top=50.0pt bot=0.0pt marks=[d1]..[d1]}
+    {span: top from column 2, 2 wide, at 0.0pt}
+  {page 6: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[d1]..[d1]}
+    {col 2: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+    {col 3: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+  {page 7: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[d1]..[d1]}
+    {col 2: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+    {col 3: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+  {page 8: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+    {col 2: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+    {col 3: top=0.0pt bot=0.0pt marks=[e1]..[e1]}
+  {page 9: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[f1]..[f1]}
+    {col 2: top=0.0pt bot=0.0pt marks=[f1]..[f1]}
+    {col 3: top=470.0pt bot=0.0pt marks=[f1]..[f1]}
+    {span: top from column 3, 1 wide, at 0.0pt}
+}
+\begin{document}
+\NCOLmark{a1}\NCOLlines{30}\NCOLmark{a2}\NCOLfloat{figure}[t]{20pt}\NCOLlines{60}\NCOLmark{a3}
+\NCOLfloat{figure*}[t]{50pt}\NCOLfloat{figure*}[b]{40pt}
+\NCOLlines{120}\NCOLmark{b1}
+%% both fit on one page: columns 1-2 at the top, 2-3 at the bottom
+\NCOLfloat{figure*}[span=2,at=tl]{60pt}\NCOLfloat{figure*}[span=2,at=br]{60pt}
+\NCOLlines{130}\NCOLmark{c1}
+%% tl 2 wide, then tr 2 wide: column 2 is not flat, the second one waits
+\NCOLfloat{figure*}[span=2,at=tl]{30pt}\NCOLfloat{figure*}[span=2,at=tr]{30pt}
+\NCOLlines{200}\NCOLmark{d1}
+%% too high for the top of a page: waits until \clearpage (float page)
+\NCOLfloat{figure*}[span=1,at=tr]{450pt}\NCOLlines{150}\NCOLmark{e1}
+\clearpage
+%% with ! it is accepted
+\NCOLfloat{figure*}[!,span=1,at=tr]{450pt}\NCOLlines{160}\NCOLmark{f1}
+\clearpage
+\end{document}

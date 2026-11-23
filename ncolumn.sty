@@ -1,13 +1,61 @@
-%% ncolumn.sty
-%% N-column layout by generalizing the standard LaTeX twocolumn output routine.
 %%
-%% Columns are built one after another by the kernel output routine (one
-%% column = one TeX "page"), exactly as \twocolumn does, so ordinary floats,
-%% footnotes and packages looking at \pagegoal keep working.
+%% ncolumn.sty
+%% ===========
+%% N columns in the way of \twocolumn of LaTeX, with material that
+%% spans columns from the corners of the page.
+%%
+%% Copyright (c) 2026 Munehiro Yamamoto <munepixyz@gmail.com>
+%%
+%% This package is licensed under the conditions of the LaTeX Project
+%% Public License, either version 1.3c of this license or (at your
+%% option) any later version.  The latest version of this license is in
+%%   https://www.latex-project.org/lppl.txt
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is Munehiro Yamamoto.
+%%
+%% Background
+%%   multicol collects the material of all columns and splits it into
+%%   the columns afterwards, so ordinary floats cannot be used in it
+%%   and packages that look at the room that is left on the page
+%%   (\pagegoal), such as tcolorbox with "breakable", need extra
+%%   care.  \twocolumn of LaTeX builds the columns one after another:
+%%   a column is a page for TeX, and the finished columns are put
+%%   side by side when the last one is done.  Floats, footnotes,
+%%   \marginpar and such packages work in it as on a page.
+%%
+%% What this package does
+%%   It makes the output routine of \twocolumn work for N columns:
+%%     (1) \@outputdblcol keeps the finished columns in N boxes
+%%         instead of one;
+%%     (2) each column has a height of its own that is reserved at its
+%%         top and at its bottom, so that material can span k columns
+%%         from one of the four corners of the page (figure*, table*
+%%         and \spanblock with the keys "span" and "at"); the material
+%%         is laid over the columns when the page is put together;
+%%     (3) the footnotes of a page are put into each column, into the
+%%         last column, or into an area of M columns across the page
+%%         (in the last case the height of the area is taken from the
+%%         .aux file of the run before).
+%%   With two columns and without the new keys, the pages are those
+%%   of \twocolumn.  \@makecol and \@outputpage are not redefined:
+%%   pLaTeX, LuaTeX-ja and the tagging code of LaTeX have their own
+%%   versions or hooks of them.  This is done with every engine, in
+%%   yoko and in tate.
+%%
+%% Tested with TeX Live 2026 (LaTeX 2026-11-01).
+%%
+%% Internal macros of LaTeX that are redefined or wrapped
+%%   \@outputdblcol, \@addtodblcol, \@dblfloat, \@topnewpage,
+%%   \@doclearpage, \@addtocurcol, \@addmarginpar, \@startcolumn,
+%%   \@footnotetext, \twocolumn, \onecolumn, the token list \output
+%%   and, for the marks,
+%%   \@expl@@@mark@update@dblcol@structures@@ (with the internal
+%%   variables of ltmarks, \g__mark_<name>).
 %%
 \NeedsTeXFormat{LaTeX2e}[2025-06-01]
-\ProvidesExplPackage {ncolumn} {2026-11-23} {0.1.0}
-  {N-column layout generalizing the standard twocolumn output routine}
+\ProvidesExplPackage{ncolumn}
+  {2026/11/23}{0.1}{N columns in the way of twocolumn}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Keys and state
@@ -1250,9 +1298,10 @@
       { \__ncol_span_arrived: }
       { \__ncol_orig_addtocurcol: }
   }
-%% With same-page-spans it may still go on the page being built: at the
-%% top if all the columns it covers are still to come, at the bottom if
-%% it starts in the current column (and there is room left) or later.
+%% With same-page-spans it still goes on the page being built in two
+%% cases: at the top if all the columns it covers are still to come, at
+%% the bottom if it starts in the current column (and there is room
+%% left) or later.
 \cs_new_protected:Npn \__ncol_span_arrived:
   {
     \@insertfalse

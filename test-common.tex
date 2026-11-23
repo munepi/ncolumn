@@ -1,0 +1,227 @@
+%% test-common.tex
+%% ===============
+%% Helpers shared by the test files; \input this file after
+%% \usepackage{ncolumn}.
+%%
+%% \NCOLlines{<n>}
+%%   <n> lines of the height of a strut, each a paragraph of its own:
+%%   text whose height does not depend on the fonts.
+%% \NCOLmark{<name>}
+%%   A mark (of a mark class of its own) at this point of the text.
+%% \NCOLfloat{<environment>}[<specifier>]{<height>}
+%%   A float without a caption: a rule of <height>.
+%% \NCOLexpect{{<line>}{<line>}...}
+%%   The state of the package that is expected for the pages of the
+%%   document, in the format described below.
+%% \NCOLfootnote{<text>}
+%%   \footnote{<text>} with a check that its text is on the page of
+%%   its mark (both pages are written to the .aux file at shipout).
+%%
+%% For each page that is shipped out, \NCOLpagestate records the state
+%% of the package with \NCOLline{<line>}:
+%%     page <p>: N=<columns> fnres=<reserved for the footnote area>
+%%     col <j>: top=<reserved> bot=<reserved> marks=[<first>]..[<last>]
+%%     span: <top|bot> from column <j>, <k> wide, at <offset>
+%% with one "col" line for each column and one "span" line for each
+%% piece of spanning material on the page.  <first> and <last> are the
+%% first and the last \NCOLmark of the column (region mcol-<j>), or
+%% the last one before the column if it has none.  "fnres" is rounded
+%% to 1pt, as the height of the footnote area depends on the fonts.
+%% <p> is \NCOLpageno, the number of the page in the output.  A test
+%% can redefine \NCOLpagestate to record something else.
+%%
+%% At \end{document}, the lines are written to the log as
+%% "NCOL-STATE: {<line>}" (ready to be copied to \NCOLexpect) and are
+%% compared with those of \NCOLexpect, if it is given; the .aux file
+%% is read back and every \NCOLfootnote is checked.  Logs
+%% "NCOL-STATE NG: ..." and "NCOL-NOTE NG: ..." for each failure, then
+%% "NCOL-RESULT OK (<p> pages, <n> notes)" or "NCOL-RESULT NG".
+%%
+%% The glue of the lengths between floats and text is removed
+%% (\floatsep, \textfloatsep, \dblfloatsep and \dbltextfloatsep), so
+%% that the reserved heights are the same for every engine.
+%%
+%% "make test" runs the tests with max_print_line=1000: TeX then does
+%% not break the long lines of the log.
+\makeatletter
+\ExplSyntaxOn
+\NewMarkClass { ncoltest }
+\seq_new:N  \g__ncoltest_got_seq
+\seq_new:N  \g__ncoltest_want_seq
+\bool_new:N \g__ncoltest_want_bool
+\bool_new:N \g__ncoltest_ng_bool
+\int_new:N  \g__ncoltest_pages_int
+\int_new:N  \g__ncoltest_note_int
+\prop_new:N \g__ncoltest_mark_prop
+\prop_new:N \g__ncoltest_text_prop
+\tl_new:N   \l__ncoltest_a_tl
+\tl_new:N   \l__ncoltest_b_tl
+
+\NewDocumentCommand \NCOLmark { m } { \InsertMark { ncoltest } {#1} }
+\NewDocumentCommand \NCOLlines { m }
+  {
+    \prg_replicate:nn {#1}
+      { \par \noindent \hbox_to_wd:nn { \linewidth } { \strut \hfil } }
+    \par
+  }
+\NewDocumentCommand \NCOLfloat { m O{} m }
+  { \begin {#1} [#2] \noindent \rule { \linewidth } {#3} \end {#1} }
+\AtBeginDocument
+  {
+    \dblfloatsep = 12pt \scan_stop: \dbltextfloatsep = 20pt \scan_stop:
+    \floatsep = 12pt \scan_stop: \textfloatsep = 20pt \scan_stop:
+  }
+
+\cs_new_protected:Npn \__ncoltest_ng:n #1
+  {
+    \bool_gset_true:N \g__ncoltest_ng_bool
+    \iow_term:e {#1}
+  }
+
+%% ------------------------------------------------------------------
+%% The state of each page
+\cs_new:Npn \NCOLpageno { \int_eval:n { \g_shipout_readonly_int + 1 } }
+\cs_new_protected:Npn \NCOLline #1
+  { \seq_gput_right:Ne \g__ncoltest_got_seq {#1} }
+\cs_new_protected:Npn \NCOLpagestate
+  {
+    \NCOLline
+      {
+        page~ \NCOLpageno :~
+        N= \int_use:N \g__ncol_n_int \c_space_tl
+        fnres= \fp_eval:n { round ( \dim_to_fp:n { \g__ncol_fnres_dim } ) } pt
+      }
+    \int_step_inline:nn { \g__ncol_n_int }
+      {
+        \NCOLline
+          {
+            col~##1:~
+            top= \dim_use:c { g__ncol_top_##1_dim } \c_space_tl
+            bot= \dim_use:c { g__ncol_bot_##1_dim } \c_space_tl
+            marks= [ \FirstMark [ mcol-##1 ] { ncoltest } ]
+                   .. [ \LastMark [ mcol-##1 ] { ncoltest } ]
+          }
+      }
+    \seq_map_inline:Nn \g__ncol_placed_seq
+      { \__ncoltest_span:nnnnnn ##1 }
+  }
+\cs_new_protected:Npn \__ncoltest_span:nnnnnn #1#2#3#4#5#6
+  { \NCOLline { span:~#2~from~column~#3,~#4~wide,~at~#5 } }
+\AddToHook { shipout / before }
+  {
+    \int_gincr:N \g__ncoltest_pages_int
+    \NCOLpagestate
+  }
+
+\NewDocumentCommand \NCOLexpect { +m }
+  {
+    \bool_gset_true:N \g__ncoltest_want_bool
+    \tl_map_inline:nn {#1}
+      { \seq_gput_right:Nn \g__ncoltest_want_seq {##1} }
+  }
+\cs_new_protected:Npn \__ncoltest_check_state:
+  {
+    \seq_map_inline:Nn \g__ncoltest_got_seq
+      { \iow_log:n { NCOL-STATE:~{##1} } }
+    \bool_if:NT \g__ncoltest_want_bool
+      {
+        \int_compare:nNnF
+          { \seq_count:N \g__ncoltest_got_seq } = { \seq_count:N \g__ncoltest_want_seq }
+          {
+            \__ncoltest_ng:n
+              {
+                NCOL-STATE~NG:~ \seq_count:N \g__ncoltest_got_seq \c_space_tl
+                lines,~want~ \seq_count:N \g__ncoltest_want_seq
+              }
+          }
+        \int_step_inline:nn
+          {
+            \int_min:nn
+              { \seq_count:N \g__ncoltest_got_seq } { \seq_count:N \g__ncoltest_want_seq }
+          }
+          {
+            \tl_set:Ne \l__ncoltest_a_tl { \seq_item:Nn \g__ncoltest_got_seq {##1} }
+            \tl_set:Ne \l__ncoltest_b_tl { \seq_item:Nn \g__ncoltest_want_seq {##1} }
+            \str_if_eq:VVF \l__ncoltest_a_tl \l__ncoltest_b_tl
+              {
+                \__ncoltest_ng:n
+                  {
+                    NCOL-STATE~NG:~line~##1:~got~{ \l__ncoltest_a_tl },~
+                    want~{ \l__ncoltest_b_tl }
+                  }
+              }
+          }
+      }
+  }
+
+%% ------------------------------------------------------------------
+%% Footnotes: the page of the mark and the page of the text
+\cs_new_protected:Npn \__ncoltest_aux:Nn #1#2
+  {
+    \iow_shipout_e:Nn \@auxout
+      { \token_to_str:N #1 {#2} { \int_use:N \c@page } }
+  }
+\cs_new_protected:Npn \NCOL@mark #1#2
+  { \prop_gput:Nnn \g__ncoltest_mark_prop {#1} {#2} }
+\cs_new_protected:Npn \NCOL@text #1#2
+  {
+    \prop_get:NnNTF \g__ncoltest_text_prop {#1} \l__ncoltest_a_tl
+      { \prop_gput:Nne \g__ncoltest_text_prop {#1} { \l__ncoltest_a_tl , #2 } }
+      { \prop_gput:Nnn \g__ncoltest_text_prop {#1} {#2} }
+  }
+\NewDocumentCommand \NCOLfootnote { +m }
+  {
+    \int_gincr:N \g__ncoltest_note_int
+    \exp_args:Ne \__ncoltest_footnote:nn
+      { \int_use:N \g__ncoltest_note_int } {#1}
+  }
+\cs_new_protected:Npn \__ncoltest_footnote:nn #1#2
+  {
+    \__ncoltest_aux:Nn \NCOL@mark {#1}
+    \footnote { \__ncoltest_aux:Nn \NCOL@text {#1} #2 }
+  }
+\cs_new_protected:Npn \__ncoltest_check_notes:
+  {
+    \int_step_inline:nn { \g__ncoltest_note_int }
+      {
+        \prop_get:NnNF \g__ncoltest_mark_prop {##1} \l__ncoltest_a_tl
+          { \tl_set:Nn \l__ncoltest_a_tl { none } }
+        \prop_get:NnNF \g__ncoltest_text_prop {##1} \l__ncoltest_b_tl
+          { \tl_set:Nn \l__ncoltest_b_tl { none } }
+        \bool_lazy_or:nnT
+          { \str_if_eq_p:Vn \l__ncoltest_a_tl { none } }
+          { ! \str_if_eq_p:VV \l__ncoltest_a_tl \l__ncoltest_b_tl }
+          {
+            \__ncoltest_ng:n
+              {
+                NCOL-NOTE~NG:~note~##1:~mark~on~page~ \l__ncoltest_a_tl ,~
+                text~on~page~ \l__ncoltest_b_tl
+              }
+          }
+      }
+  }
+
+%% ------------------------------------------------------------------
+%% The result
+\AddToHook { enddocument / afterlastpage }
+  {
+    \prop_gclear:N \g__ncoltest_mark_prop
+    \prop_gclear:N \g__ncoltest_text_prop
+  }
+\AddToHook { enddocument / afteraux }
+  {
+    \__ncoltest_check_state:
+    \__ncoltest_check_notes:
+    \bool_if:NTF \g__ncoltest_ng_bool
+      { \iow_term:n { NCOL-RESULT~NG } }
+      {
+        \iow_term:e
+          {
+            NCOL-RESULT~OK~
+            ( \int_use:N \g__ncoltest_pages_int \c_space_tl pages,~
+              \int_use:N \g__ncoltest_note_int \c_space_tl notes )
+          }
+      }
+  }
+\ExplSyntaxOff
+\makeatother

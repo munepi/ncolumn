@@ -1,0 +1,57 @@
+%% test-tcolorbox.tex
+%% ==================
+%% Typesetting test: tcolorbox, float, caption and hyperref in three
+%% columns, with \DocumentMetadata.
+%%
+%%   pdflatex test-tcolorbox.tex   (or lualatex), until there is no
+%%   "Rerun" warning
+%%
+%% What is covered:
+%%   * a breakable tcolorbox that is broken across columns, and one
+%%     that is broken across pages;
+%%   * a footnote inside a breakable box and one in the text, with
+%%     footnotes=span;
+%%   * a float with [H] of the float package, \label and \ref with
+%%     hyperref;
+%%   * a tcolorbox inside a float across two columns, and inside a
+%%     \spanblock across all columns, with a section heading;
+%%   * \cleardoublepage.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK, no error and, after the last run, no warning of
+%%     ncolumn;
+%%   * in the PDF, the parts of the broken boxes follow each other
+%%     from column to column, and the boxes in the spanning material
+%%     are as wide as the columns they span.
+\DocumentMetadata{}
+\documentclass[twoside]{article}
+\usepackage[a4paper,margin=20mm]{geometry}
+\usepackage[columns=3,footnotes=span]{ncolumn}
+\usepackage{lipsum,float,caption}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\input{test-common}
+\pagestyle{headings}
+\begin{document}
+\section{Boxes}\label{sec:a}
+\lipsum[1-2]
+\begin{tcolorbox}[breakable,title=Breakable box across columns]
+\lipsum[3-7]\footnote{Footnote from inside a breakable box.}
+\end{tcolorbox}
+\lipsum[8]
+\begin{figure}[H]\centering\rule{.8\linewidth}{2cm}\caption{Here with float [H]}\label{fig:h}\end{figure}
+\lipsum[9-12] See Figure~\ref{fig:h} and Section~\ref{sec:a}.\NCOLfootnote{Ordinary footnote.}
+\begin{tcolorbox}[breakable,enhanced,colback=yellow!10,title=Breakable box across a page]
+\lipsum[13-24]
+\end{tcolorbox}
+\begin{figure*}[span=2,at=tr]
+\begin{tcolorbox}[title=tcolorbox inside a float across two columns]\lipsum[2]\end{tcolorbox}
+\caption{A boxed float}\end{figure*}
+\lipsum[25-34]
+\spanblock[span=3,at=tl]{\begin{tcolorbox}[colback=blue!5,title=Spanning block]
+  \section{Heading in a box}\lipsum[1][1-3]\end{tcolorbox}}
+\lipsum[35-40]
+\cleardoublepage
+\section{After cleardoublepage}
+\lipsum[41-44]
+\end{document}

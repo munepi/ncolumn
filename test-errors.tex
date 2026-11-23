@@ -1,0 +1,28 @@
+%% test-errors.tex
+%% ===============
+%% The errors of ncolumn.  Run with -interaction=nonstopmode and
+%% select the case by \CASE:
+%%
+%%   pdflatex -interaction=nonstopmode -jobname=test-errors-package \
+%%     "\def\CASE{package}\input test-errors"
+%%
+%% Cases and the error message to find in the log:
+%%   package  a package that redefines the same parts of the output
+%%            routine (here: balance) is loaded:
+%%            "Package 'balance' redefines the same parts of the
+%%            output routine and cannot be used with ncolumn."
+%%   columns  the key "columns" is set after \begin{document}:
+%%            "Key 'columns' can only be set in the preamble."
+\ifdefined\CASE\else\def\CASE{package}\fi
+\documentclass{article}
+\def\NCOLcase#1{\def\NCOLtmp{#1}\ifx\NCOLtmp\CASE}
+\usepackage[columns=3]{ncolumn}
+\NCOLcase{package}
+  \usepackage{balance}
+\fi
+\begin{document}
+\NCOLcase{columns}
+  \ncolumnsetup{columns=4}
+\fi
+Text.
+\end{document}

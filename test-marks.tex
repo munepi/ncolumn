@@ -1,0 +1,40 @@
+%% test-marks.tex
+%% ==============
+%% Typesetting test for every engine: the marks of a page of three
+%% columns.
+%%
+%%   pdflatex test-marks.tex   (or xelatex / lualatex / platex / uplatex)
+%%
+%% What is covered:
+%%   * \markright in some of the columns of four pages; each column
+%%     ends with \newpage;
+%%   * the top, first and last mark of the page, \rightmark, the last
+%%     mark of the first column and the first mark of the last column
+%%     (regions first-column and last-column).
+%% The first mark of a page is that of the first column that has a
+%% mark; without a mark on the page it is the last mark before it.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK, and no error.
+\documentclass{article}
+\usepackage[columns=3]{ncolumn}
+\input{test-common}
+\renewcommand\NCOLpagestate{%
+  \NCOLline{page \NCOLpageno: top=[\TopMark{2e-right}]
+    first=[\FirstMark{2e-right}] last=[\LastMark{2e-right}]
+    rightmark=[\rightmark]
+    col1=[\LastMark[first-column]{2e-right}]
+    col3=[\FirstMark[last-column]{2e-right}]}}
+\NCOLexpect{
+  {page 1: top=[] first=[A1] last=[C1] rightmark=[A1] col1=[A1] col3=[C1]}
+  {page 2: top=[C1] first=[E1] last=[E1] rightmark=[E1] col1=[C1] col3=[E1]}
+  {page 3: top=[E1] first=[I1] last=[I1] rightmark=[I1] col1=[E1] col3=[I1]}
+  {page 4: top=[I1] first=[I1] last=[I1] rightmark=[I1] col1=[I1] col3=[I1]}
+}
+\begin{document}
+a\markright{A1}\newpage b\markright{B1} b\markright{B2}\newpage c\markright{C1}\newpage
+d\newpage e\markright{E1}\newpage f\newpage
+g\newpage h\newpage i\markright{I1}\newpage
+j\newpage k\newpage l
+\clearpage
+\end{document}

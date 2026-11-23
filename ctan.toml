@@ -1,0 +1,46 @@
+# ctan.toml -- metadata for "ctango upload".
+# Keys follow the CTAN submission API: https://ctan.org/help/submit
+# uploader/email are taken from ~/.config/ctango/config.toml or git config.
+
+pkg         = "ncolumn"
+ctanPath    = "/macros/latex/contrib/ncolumn"
+summary     = "N columns in the way of twocolumn, with spanning material"
+description = '''
+<p>
+<code>\twocolumn</code> of LaTeX builds the columns of a page one after
+another, so floats, footnotes, <code>\marginpar</code> and packages
+that look at the room left on the page (such as tcolorbox with
+<code>breakable</code>) work in it as on a page.  This package makes
+the output routine of <code>\twocolumn</code> work for three, four or
+more columns.  With two columns, the pages are those of
+<code>\twocolumn</code>.
+</p>
+<p>
+Material can span several columns from one of the four corners of the
+page: <code>figure*</code> and <code>table*</code> take the keys
+<code>span</code> and <code>at</code>, and <code>\spanblock</code> puts
+material that is not a float, such as a heading.  The footnotes of a
+page are put into each column, into the last column, or into an area
+of one or more columns across the page.
+</p>
+<p>
+Supported formats/engines: <code>pdflatex</code>, <code>xelatex</code>,
+<code>lualatex</code>, <code>platex</code>, <code>uplatex</code>
+(with <code>dvipdfmx</code>), in horizontal and vertical writing.
+</p>
+'''
+author      = ["Munehiro Yamamoto"]
+license     = ["lppl1.3c"]
+topic       = ["multicol", "float", "footnote"]
+# home        = "https://..."
+# bugtracker  = ["https://..."]
+# support     = "https://..."
+# repository  = ["https://..."]
+# development = "https://..."
+
+archive     = "ncolumn.zip"  # built by "make ctanzip"
+
+# The version is read from this file (\ProvidesPackage / \ProvidesExplPackage).
+# Add pattern = '...' to use your own regular expression (first group = version).
+[version]
+file        = "ncolumn.sty"
