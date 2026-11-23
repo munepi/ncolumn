@@ -1,0 +1,64 @@
+%% test-footnote-switch.tex
+%% ========================
+%% Typesetting test for every engine: the key "footnotes" changed with
+%% \ncolumnsetup from page to page.
+%%
+%%   pdflatex test-footnote-switch.tex   (or xelatex / lualatex /
+%%   platex / uplatex), until there is no "Rerun" warning
+%% The class is article: the expected state depends on its layout.
+%%
+%% What is covered:
+%%   * footnotes=span set right after \ncolumn{2}, at the top of the
+%%     page: this page and the next one reserve the height of their
+%%     footnote areas (fnres);
+%%   * footnotes=last-column set right after \ncolumn{3}: nothing is
+%%     reserved;
+%%   * footnotes=span set in the first column of a page that has text
+%%     already;
+%%   * footnote-reserve set right after \ncolumn{2}: the fixed height
+%%     is reserved on this page.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK (the state of each page, and every footnote text
+%%     is on the page of its mark), and no error;
+%%   * after the last run, no warning of ncolumn: the heights that are
+%%     reserved are those of the footnote areas.
+\documentclass{article}
+\usepackage[columns=3]{ncolumn}
+\input{test-common}
+\newcommand\fn{\NCOLfootnote{note}}
+\NCOLexpect{
+  {page 1: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 2: top=0.0pt bot=0.0pt marks=[a]..[a]}
+    {col 3: top=0.0pt bot=0.0pt marks=[a]..[a]}
+  {page 2: N=2 fnres=28pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+  {page 3: N=2 fnres=19pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[b]..[b]}
+    {col 2: top=0.0pt bot=0.0pt marks=[b]..[b]}
+  {page 4: N=3 fnres=0pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[c]..[c]}
+    {col 2: top=0.0pt bot=0.0pt marks=[c]..[c]}
+    {col 3: top=0.0pt bot=0.0pt marks=[c]..[c]}
+  {page 5: N=2 fnres=28pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[d]..[d]}
+    {col 2: top=0.0pt bot=0.0pt marks=[d]..[d]}
+  {page 6: N=2 fnres=40pt}
+    {col 1: top=0.0pt bot=0.0pt marks=[e]..[e]}
+    {col 2: top=0.0pt bot=0.0pt marks=[e]..[e]}
+}
+\begin{document}
+\NCOLmark{a}\NCOLlines{10}\fn\NCOLlines{100}
+\ncolumn{2}\ncolumnsetup{footnotes=span}
+\NCOLmark{b}\NCOLlines{10}\fn\NCOLlines{40}\fn\NCOLlines{60}\fn\NCOLlines{10}
+\ncolumn{3}\ncolumnsetup{footnotes=last-column}
+\NCOLmark{c}\NCOLlines{10}\fn\NCOLlines{60}
+\ncolumn{2}
+\NCOLmark{d}\NCOLlines{5}
+\ncolumnsetup{footnotes=span}
+\NCOLlines{5}\fn\NCOLlines{50}\fn\NCOLlines{10}
+\ncolumn{2}\ncolumnsetup{footnote-reserve=40pt}
+\NCOLmark{e}\NCOLlines{10}\fn\NCOLlines{40}
+\end{document}

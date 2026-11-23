@@ -41,10 +41,10 @@ ncolumn.pdf: ncolumn.tex ncolumn.sty
 ##  * every test compiles without errors
 ##  * TESTS: NCOL-RESULT OK and no NCOL-* NG (see test-common.tex):
 ##      - test-basic, test-switch, test-footnote, test-footnote-span,
-##        test-samepage, test-marks, test-tate: the state of the
-##        package for each page (the heights that are reserved in each
-##        column, the spanning material and the marks of each column)
-##        is the one that is expected;
+##        test-footnote-switch, test-samepage, test-marks, test-tate:
+##        the state of the package for each page (the heights that are
+##        reserved in each column, the spanning material and the marks
+##        of each column) is the one that is expected;
 ##      - every footnote text is on the page of its mark;
 ##    and, after the last run, no ncolumn warning (but the one on
 ##    stfloats, which jlreq loads with LuaTeX)
@@ -85,6 +85,11 @@ TESTS := \
   lualatex:test-footnote-span-lualatex:'\input test-footnote-span' \
   platex:test-footnote-span-platex:'\input test-footnote-span' \
   uplatex:test-footnote-span-uplatex:'\input test-footnote-span' \
+  pdflatex:test-footnote-switch-pdflatex:'\input test-footnote-switch' \
+  xelatex:test-footnote-switch-xelatex:'\input test-footnote-switch' \
+  lualatex:test-footnote-switch-lualatex:'\input test-footnote-switch' \
+  platex:test-footnote-switch-platex:'\input test-footnote-switch' \
+  uplatex:test-footnote-switch-uplatex:'\input test-footnote-switch' \
   pdflatex:test-samepage-pdflatex:'\input test-samepage' \
   xelatex:test-samepage-xelatex:'\input test-samepage' \
   lualatex:test-samepage-lualatex:'\input test-samepage' \

@@ -9,7 +9,7 @@
 \usepackage{xcolor}
 \usepackage{ncolumn}
 \usepackage[colorlinks, allcolors=blue!50!black]{hyperref}
-\newcommand*\ncolversion{v0.1 (2026/11/23)}
+\newcommand*\ncolversion{v0.2 (2026/11/24)}
 \newcommand*\cs[1]{\texttt{\char`\\#1}}
 \newcommand*\pkg[1]{\textsf{#1}}
 \newcommand*\key[1]{\texttt{#1}}
@@ -182,6 +182,10 @@ does not have).  Up to about five runs can be needed.
 \key{footnote-reserve=}\meta{length} reserves a fixed height on every
 page and does not use the \texttt{.aux} file.
 
+\key{footnotes} can differ from page to page: give it to
+\cs{ncolumnsetup} right after \verb|\ncolumn{|\meta{N}\verb|}|, which
+starts a new page (section~\ref{sec:examples} does this).
+
 In tate with \pkg{jlreq}, \key{last-column} is the default, as
 \pkg{jlreq} puts the footnotes at the bottom of the last column.
 
@@ -236,10 +240,11 @@ The parameters of \LaTeX{} for two columns are used as they are:
 counter \texttt{dblbotnumber} (default 2) and \cs{dblbotfraction}
 (default 0.5).
 
+\clearpage
 \section{Examples}\label{sec:examples}
 
-The next two pages are typeset with \key{same-page-spans} and with a
-rule between the columns (\cs{columnseprule}).
+The next three pages are typeset with \key{same-page-spans} and with
+a rule between the columns (\cs{columnseprule}).
 \begin{itemize}
 \item The first page has three columns.  Figure~\ref{fig:col} is an
   ordinary \texttt{figure} with \texttt{[t]}.  Figure~\ref{fig:tr} is
@@ -252,6 +257,9 @@ rule between the columns (\cs{columnseprule}).
   is a \texttt{figure*} with \texttt{[b]}; both are given at the
   beginning of the first column.  All footnotes of the page are in its
   last column (\key{footnotes=last-column}).
+\item The third page has two columns.  All footnotes of the page are
+  below the two columns, in one column that is as wide as the page
+  (\key{footnotes=span}; \key{footnote-columns=1} is the default).
 \end{itemize}
 
 %% ------------------------------------------------------------------
@@ -290,7 +298,19 @@ rule between the columns (\cs{columnseprule}).
 \filler{12}\footnote{A footnote from a later column.}
 \filler{24}
 
+\ncolumn{2}
+\ncolumnsetup{footnotes=span}
+\filler{5}\footnote{A footnote from the first column.  It is set in
+  one column that is as wide as the page, so that a long footnote text
+  like this one takes fewer lines than it would in a column of the
+  text.}
+\filler{9}\footnote{Another footnote from the first column.}
+\filler{12}\footnote{A footnote from the second column.  The
+  footnotes of both columns are in the order of their marks.}
+\filler{19}
+
 \onecolumn
+\ncolumnsetup{footnotes=column}
 \setlength\columnseprule{0pt}
 
 \section{How it works}
@@ -371,6 +391,11 @@ tests.
 
 \begin{description}
 \item[v0.1 (2026/11/23)] First version.
+\item[v0.2 (2026/11/24)] \key{footnotes} and \key{footnote-reserve}
+  given to \cs{ncolumnsetup} in the first column of a page, e.g.\@
+  right after \cs{ncolumn}, now act on that page: the height of its
+  footnote area was not reserved.  Tested with \pkg{tcbpagefootnote}
+  and \pkg{tcbnestbreak}.
 \end{description}
 
 \section{License}

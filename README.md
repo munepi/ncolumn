@@ -87,6 +87,8 @@ With `span`, the columns that are finished cannot be made shorter for a footnote
 
 Reserving the room can move the line of the mark to the next page, and not reserving it brings it back. If the package finds this, it keeps the room reserved (the page is then shorter by a footnote area that it does not have). Up to about five runs can be needed. `footnote-reserve=<length>` reserves a fixed height on every page and does not use the `.aux` file.
 
+`footnotes` can differ from page to page: give it to `\ncolumnsetup` right after `\ncolumn{N}`, which starts a new page.
+
 In tate with jlreq, `last-column` is the default, as jlreq puts the footnotes at the bottom of the last column.
 
 ### Marginal notes
@@ -171,6 +173,7 @@ stfloats gives a warning only, as jlreq loads it with LuaLaTeX; ncolumn replaces
 | `test-switch.tex` | all five | `\ncolumn{4}[...]`, `\spanblock`, `\spanblock*`, `\twocolumn[...]`, `\cleardoublepage`, `\onecolumn`, `\ncolumn{2}` |
 | `test-footnote.tex` | all five | `footnotes=last-column`, with float pages and a page that ends in its first column |
 | `test-footnote-span.tex` | all five | `footnotes=span` with `footnote-columns=2` in four columns, with a float at the bottom; several runs |
+| `test-footnote-switch.tex` | all five | `footnotes` and `footnote-reserve` changed with `\ncolumnsetup` from page to page: right after `\ncolumn`, and in the first column of a page that has text; several runs |
 | `test-samepage.tex` | all five | `same-page-spans`: floats that are put on the page where they are met, and floats that are not |
 | `test-marks.tex` | all five | the marks of a page of three columns, `\rightmark`, the regions `first-column` and `last-column` |
 | `test-tate.tex` | platex (tarticle), uplatex (utarticle), lualatex (ltjtarticle) | spanning floats, `\spanblock` and `footnotes=last-column` in tate |

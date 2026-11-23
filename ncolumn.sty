@@ -55,7 +55,7 @@
 %%
 \NeedsTeXFormat{LaTeX2e}[2025-06-01]
 \ProvidesExplPackage{ncolumn}
-  {2026/11/23}{0.1}{N columns in the way of twocolumn}
+  {2026/11/24}{0.2}{N columns in the way of twocolumn}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Keys and state
@@ -134,9 +134,14 @@
         \tl_gset:NV \g__ncol_fnmode_tl \l_keys_choice_tl
         \bool_gset_true:N \g__ncol_fnmode_set_bool
         \cs_if_exist_use:N \__ncol_fn_set_params:
+        \cs_if_exist_use:N \__ncol_fn_changed:
       } ,
     footnote-columns .int_gset:N = \g__ncol_fncols_int ,
-    footnote-reserve .dim_gset:N = \g__ncol_fnreserve_dim ,
+    footnote-reserve .code:n =
+      {
+        \dim_gset:Nn \g__ncol_fnreserve_dim {#1}
+        \cs_if_exist_use:N \__ncol_fn_changed:
+      } ,
     same-page-spans .bool_gset:N = \g__ncol_samepage_bool ,
     same-page-spans .default:n = true ,
   }
@@ -1058,6 +1063,40 @@
     \dim_gset:Nn \g__ncol_fn_prev_dim {#2}
     \dim_gset:Nn \g__ncol_fn_lock_dim {#3}
   }
+%% \ncolumnsetup with "footnotes" or "footnote-reserve" in the first
+%% column of a page, e.g. right after \ncolumn{N}: the page has started
+%% with the reservation of the old setting.  It is taken again, and the
+%% difference is taken off the height of the column, also if the
+%% column has text already.  In a later column the page keeps what it
+%% has, as the columns before it are finished.
+\bool_new:N \g__ncol_fn_started_bool
+\dim_new:N \l__ncol_fn_delta_dim
+\cs_new_protected:Npn \__ncol_fn_changed:
+  {
+    \bool_lazy_all:nT
+      {
+        { \g__ncol_fn_started_bool }
+        { \legacy_if_p:n { @twocolumn } }
+        { \int_compare_p:nNn { \g__ncol_cur_int } = { 1 } }
+      }
+      {
+        \dim_set_eq:NN \l__ncol_fn_delta_dim \g__ncol_fnres_dim
+        \__ncol_fn_page_reset:
+        \dim_set:Nn \l__ncol_fn_delta_dim
+          { \g__ncol_fnres_dim - \l__ncol_fn_delta_dim }
+        \dim_compare:nNnF { \l__ncol_fn_delta_dim } = { \c_zero_dim }
+          {
+            \global \advance \@colht - \l__ncol_fn_delta_dim
+            \global \advance \@colroom - \l__ncol_fn_delta_dim
+            \global \vsize \@colroom
+            \dim_compare:nNnT { \pagegoal } < { \c_max_dim }
+              {
+                \pagegoal = \dim_eval:n { \pagegoal - \l__ncol_fn_delta_dim }
+                \scan_stop:
+              }
+          }
+      }
+  }
 \cs_new_protected:Npn \ncol@fnres #1#2#3#4
   { \tl_gset:cn { g__ncol_fnres_ #1 _tl } { {#2} {#3} {#4} } }
 
@@ -1530,4 +1569,5 @@
       \global \@colroom \@colht
       \global \vsize \@colht
     \fi
+    \bool_gset_true:N \g__ncol_fn_started_bool
   }
