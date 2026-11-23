@@ -192,6 +192,22 @@ margin: to the margin on the side of the first column from the first
 half of the columns, to the other margin from the second half.  The
 notes of columns that share a margin do not overlap.
 
+\subsection{\pkg{tcolorbox}}
+
+A \pkg{tcolorbox} with \key{breakable} is broken across columns as it
+is across pages.  Two packages for \pkg{tcolorbox} are tested with
+\pkg{ncolumn}:
+\begin{itemize}
+\item \pkg{tcbpagefootnote} (v1.4 or later): with the key \key{page
+  footnote}, the footnotes of a box are footnotes of the text.
+  \key{footnotes} puts them as it puts the others, for each part of a
+  box that is broken across columns, and in a tagged PDF too.
+\item \pkg{tcbnestbreak} (v0.2): breakable boxes inside a breakable
+  box are broken across columns as well.
+\end{itemize}
+A box in spanning material cannot have footnotes of the text (see
+section~\ref{sec:limitations}).
+
 \subsection{Options and parameters}
 
 \begin{center}
@@ -302,7 +318,7 @@ rule between the columns (\cs{columnseprule}).
 The internal macros of \LaTeX{} that are redefined or wrapped are
 listed at the top of \texttt{ncolumn.sty}.
 
-\section{Limitations}
+\section{Limitations}\label{sec:limitations}
 
 \begin{itemize}
 \item Material spans columns from the corners of the page only.  It
@@ -314,7 +330,8 @@ listed at the top of \texttt{ncolumn.sty}.
   page, at the side of the first or of the last column.
 \item With \key{footnotes=span}, a footnote is not split across pages.
 \item A footnote inside spanning material is not typeset, as in an
-  ordinary float.
+  ordinary float or in \verb|\twocolumn[...]|.  Put \cs{footnotemark}
+  into the material and \cs{footnotetext} after it.
 \item In tate with \pkg{jlreq}, \key{footnotes=column} and
   \key{footnotes=span} do not work with the code of \pkg{jlreq} for
   its notes, which is written for two columns.  Use \key{last-column}.
@@ -340,7 +357,11 @@ checks that every footnote text is on the page of its mark, and writes
 
 \texttt{test-twocolumn.tex} is compiled with and without the package:
 with two columns, every page is the same, pixel by pixel, as with
-\cs{twocolumn} of the \LaTeX{} kernel.  \texttt{test-text.tex},
+\cs{twocolumn} of the \LaTeX{} kernel.
+\texttt{test-tcbpagefootnote.tex} and \texttt{test-tcbnestbreak.tex}
+also check that every footnote text has the width of the footnotes of
+the page and that no footnote is split or held over.
+\texttt{test-text.tex},
 \texttt{test-japanese.tex} (yoko and tate) and
 \texttt{test-tcolorbox.tex} are documents with real text that are also
 meant to be looked at.  See \texttt{README.md} for the list of the

@@ -93,6 +93,15 @@ In tate with jlreq, `last-column` is the default, as jlreq puts the footnotes at
 
 With three or more columns, a `\marginpar` goes to the nearer margin: to the margin on the side of the first column from the first half of the columns, to the other margin from the second half. The notes of columns that share a margin do not overlap.
 
+### tcolorbox
+
+A tcolorbox with `breakable` is broken across columns as it is across pages. Two packages for tcolorbox are tested with ncolumn:
+
+* tcbpagefootnote (v1.4 or later): with the key `page footnote`, the footnotes of a box are footnotes of the text. `footnotes` puts them as it puts the others, for each part of a box that is broken across columns, and in a tagged PDF too.
+* tcbnestbreak (v0.2): breakable boxes inside a breakable box are broken across columns as well.
+
+A box in spanning material cannot have footnotes of the text (see Limitations).
+
 ### Options
 
 | Key | Where | Meaning |
@@ -135,7 +144,7 @@ Copy `ncolumn.sty` to your local TeX tree:
 * Material spans columns from the corners of the page only. It cannot be put in the middle of a page with text above and below it: the columns would have to be balanced for that. The columns of the last page are not balanced either.
 * When the floats are put out by `\clearpage`, a float that spans some of the columns is not put into its corner but on a float page, at the side of the first or of the last column.
 * With `footnotes=span`, a footnote is not split across pages.
-* A footnote inside spanning material is not typeset, as in an ordinary float.
+* A footnote inside spanning material is not typeset, as in an ordinary float or in `\twocolumn[...]`. Put `\footnotemark` into the material and `\footnotetext` after it.
 * In tate with jlreq, `footnotes=column` and `footnotes=span` do not work with the code of jlreq for its notes, which is written for two columns. Use `last-column`.
 
 ## Packages that cannot be used with ncolumn
@@ -153,6 +162,7 @@ stfloats gives a warning only, as jlreq loads it with LuaLaTeX; ncolumn replaces
 * no error and, after the last run, no warning of ncolumn;
 * `NCOL-RESULT OK`: the state of the package for each page is the one that the test expects (the heights that are reserved at the top and at the bottom of each column, the spanning material, and the first and the last mark of each column), and every footnote text is on the page of its mark (see `test-common.tex`);
 * `test-twocolumn`: every page is the same, pixel by pixel, with ncolumn and with `\twocolumn` of the LaTeX kernel (needs `pdftoppm`);
+* `test-tcbpagefootnote`, `test-tcbnestbreak`: every footnote text also has the width of the footnotes of the page, and no footnote is split or held over. These tests take the two packages from `../tcbpagefootnote` and `../tcbnestbreak` (`make test TPF=<directory> TNB=<directory>` for other places) and are skipped if they are not there;
 * `test-errors`: the expected error message.
 
 | Test | Engines | What it covers |
@@ -167,6 +177,8 @@ stfloats gives a warning only, as jlreq loads it with LuaLaTeX; ncolumn replaces
 | `test-text.tex` | all five; each value of `footnotes` | a document with real text: sections, running heads, captions, floats from each of the four corners, `\spanblock`, footnotes, four columns with `same-page-spans` and `\marginpar` |
 | `test-japanese.tex` | platex and uplatex (jsarticle, tarticle, utarticle), lualatex (ltjsarticle, ltjtarticle, jlreq in yoko and in tate) | a document with Japanese text, in yoko and in tate |
 | `test-tcolorbox.tex` | pdflatex, lualatex | tcolorbox with `breakable` across columns and pages, in a spanning float and in a `\spanblock`; float (`[H]`), caption, hyperref, `\DocumentMetadata` |
+| `test-tcbpagefootnote.tex` | all five; each value of `footnotes`; pdflatex and lualatex with tagging; platex, uplatex and lualatex in tate | tcbpagefootnote: `page footnote` in a box that is not broken, in breakable boxes that are broken across columns and pages, and a box in a `\spanblock` |
+| `test-tcbnestbreak.tex` | pdflatex, lualatex, uplatex; each value of `footnotes` | tcbnestbreak: breakable boxes inside a breakable box, three deep, across columns and pages, with `page footnote` |
 | `test-twocolumn.tex` | all five | two columns: the same pages as `\twocolumn` of the LaTeX kernel |
 | `test-errors.tex` | pdflatex | the errors of the package |
 

@@ -1,0 +1,96 @@
+%% test-tcbpagefootnote.tex
+%% ========================
+%% Typesetting test: the tcbpagefootnote package (the key "page
+%% footnote" of tcolorbox) in three columns.
+%%
+%%   pdflatex test-tcbpagefootnote.tex   (or xelatex / lualatex /
+%%   platex / uplatex), until there is no "Rerun" warning
+%%   \def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote
+%%   \def\NCOLtagging{}\input test-tcbpagefootnote  (tagged PDF)
+%%   \def\CLS{utarticle}\input test-tcbpagefootnote (tate)
+%% "make test" takes tcbpagefootnote from ../tcbpagefootnote.
+%%
+%% What is covered:
+%%   * a box that is not broken, with footnotes in its title, its
+%%     upper part and its lower part;
+%%   * a breakable box that starts in the first column and is broken
+%%     across all the columns of the page and the first column of the
+%%     next one, with footnotes in each part: its part in the last
+%%     column fills the column and has two footnotes;
+%%   * a breakable box that starts in the last column and goes on in
+%%     the first two columns of the next page;
+%%   * footnotes of the text before, between and after the boxes (not
+%%     at the end of a column, where LaTeX splits a footnote);
+%%   * a box in a \spanblock: \footnotemark in the box and
+%%     \footnotetext after the block.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK: every footnote text is on the page of its mark
+%%     and has the width of the footnotes of the page (a column, or a
+%%     column of the footnote area with footnotes=span);
+%%   * no error, no warning of ncolumn or tcbpagefootnote, no overfull
+%%     \vbox and no "% split" (of \tracingpages) in the log: no
+%%     footnote is split or held over;
+%%   * in the PDF, the parts of the broken boxes follow each other
+%%     from column to column, the footnotes are where the option
+%%     "footnotes" puts them, and the columns are filled.
+\ifdefined\NCOLtagging \DocumentMetadata{tagging=on}\fi
+\ifdefined\CLS\else\def\CLS{article}\fi
+\ifdefined\ptexversion\def\CLSOPT{dvipdfmx}\else\def\CLSOPT{}\fi
+\ifdefined\NCOLopt\else\def\NCOLopt{columns=3}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+\expandafter\usepackage\expandafter[\NCOLopt]{ncolumn}
+\usepackage{tcbpagefootnote}
+\tcbuselibrary{breakable}
+\ifdefined\ptexversion \ifdefined\tate \usepackage{pxpgftate}\fi \fi
+\input{test-common}
+%% No stretch or shrink above the footnotes: a column that needs the
+%% shrink is overfull by the depth of its last line (LaTeX kernel).
+\skip\footins=1\skip\footins
+%% A footnote of three lines
+\newcommand\fn{\NCOLfootnote{note\par note\par note}}
+\begin{document}
+\NCOLnotewidth
+\tracingpages=1
+\NCOLlines{4}
+text\fn
+\begin{tcolorbox}[page footnote, title={title\fn}]
+upper\fn
+\tcblower
+lower\fn
+\end{tcolorbox}
+\NCOLlines{4}
+text\fn
+%% From the first column of page 1 to the first column of page 2: the
+%% part in the last column fills it and has two footnotes.
+\begin{tcolorbox}[breakable, page footnote]
+first\fn
+\NCOLlines{24}
+second\fn
+\NCOLlines{40}
+third\fn
+\NCOLlines{20}
+fourth\fn
+\NCOLlines{30}
+fifth\fn
+\NCOLlines{10}
+\end{tcolorbox}
+\NCOLlines{12}
+text\fn
+\NCOLlines{72}
+%% From the last column of page 2 to the second column of page 3
+\begin{tcolorbox}[breakable, page footnote]
+sixth\fn
+\NCOLlines{50}
+seventh\fn
+\NCOLlines{44}
+eighth\fn
+\NCOLlines{10}
+\end{tcolorbox}
+\NCOLlines{12}
+\spanblock[span=2,at=tl]{\begin{tcolorbox}[title=A box in a spanning block]
+block\NCOLfootnotemark
+\end{tcolorbox}}\NCOLfootnotetext{note of the block}
+\NCOLlines{8}
+text\fn
+\end{document}

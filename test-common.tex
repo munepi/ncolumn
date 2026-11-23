@@ -16,6 +16,20 @@
 %% \NCOLfootnote{<text>}
 %%   \footnote{<text>} with a check that its text is on the page of
 %%   its mark (both pages are written to the .aux file at shipout).
+%% \NCOLfootnotemark, \NCOLfootnotetext{<text>}
+%%   \footnotemark and the \footnotetext{<text>} that belongs to it,
+%%   with the same check.
+%% \NCOLatcheck{<code>}, \NCOLng{<text>}
+%%   For checks of a test file of its own: <code> is run at
+%%   \end{document}, after the .aux file is read back and before the
+%%   result is written; \NCOLng{<text>} in it logs "NCOL-<text>" (to
+%%   be written as "... NG: ...") and makes the result NG.
+%% \NCOLnotewidth[<width>]
+%%   From here on, the text of each \NCOLfootnote has to be typeset
+%%   with this \hsize.  Without the argument, the width is the one
+%%   that ncolumn gives to the footnotes at this point: that of a
+%%   column of the footnote area with footnotes=span, \columnwidth
+%%   otherwise (to be used outside boxes).
 %%
 %% For each page that is shipped out, \NCOLpagestate records the state
 %% of the package with \NCOLline{<line>}:
@@ -33,7 +47,8 @@
 %% At \end{document}, the lines are written to the log as
 %% "NCOL-STATE: {<line>}" (ready to be copied to \NCOLexpect) and are
 %% compared with those of \NCOLexpect, if it is given; the .aux file
-%% is read back and every \NCOLfootnote is checked.  Logs
+%% is read back and every \NCOLfootnote is checked (its page and, after
+%% \NCOLnotewidth, its width).  Logs
 %% "NCOL-STATE NG: ..." and "NCOL-NOTE NG: ..." for each failure, then
 %% "NCOL-RESULT OK (<p> pages, <n> notes)" or "NCOL-RESULT NG".
 %%
@@ -54,6 +69,9 @@
 \int_new:N  \g__ncoltest_note_int
 \prop_new:N \g__ncoltest_mark_prop
 \prop_new:N \g__ncoltest_text_prop
+\prop_new:N \g__ncoltest_width_prop
+\prop_new:N \g__ncoltest_wantwidth_prop
+\tl_new:N   \g__ncoltest_notewidth_tl
 \tl_new:N   \l__ncoltest_a_tl
 \tl_new:N   \l__ncoltest_b_tl
 
@@ -77,6 +95,10 @@
     \bool_gset_true:N \g__ncoltest_ng_bool
     \iow_term:e {#1}
   }
+\tl_new:N \g__ncoltest_atcheck_tl
+\NewDocumentCommand \NCOLatcheck { +m }
+  { \tl_gput_right:Nn \g__ncoltest_atcheck_tl {#1} }
+\NewDocumentCommand \NCOLng { m } { \__ncoltest_ng:n { NCOL-#1 } }
 
 %% ------------------------------------------------------------------
 %% The state of each page
@@ -169,17 +191,59 @@
       { \prop_gput:Nne \g__ncoltest_text_prop {#1} { \l__ncoltest_a_tl , #2 } }
       { \prop_gput:Nnn \g__ncoltest_text_prop {#1} {#2} }
   }
+%% The width is taken when the text is typeset, not at shipout.
+\cs_new_protected:Npn \NCOL@width #1#2
+  { \prop_gput:Nnn \g__ncoltest_width_prop {#1} {#2} }
+\cs_new_protected:Npn \__ncoltest_aux_width:n #1
+  {
+    \iow_shipout:Ne \@auxout
+      { \token_to_str:N \NCOL@width {#1} { \dim_use:N \tex_hsize:D } }
+  }
+\NewDocumentCommand \NCOLnotewidth { o }
+  {
+    \IfNoValueTF {#1}
+      {
+        \__ncol_fn_span:TF
+          {
+            \__ncol_fn_set_wd:
+            \tl_gset:Ne \g__ncoltest_notewidth_tl { \dim_use:N \l__ncol_fn_wd_dim }
+          }
+          { \tl_gset:Ne \g__ncoltest_notewidth_tl { \dim_use:N \columnwidth } }
+      }
+      { \tl_gset:Ne \g__ncoltest_notewidth_tl { \dim_eval:n {#1} } }
+  }
 \NewDocumentCommand \NCOLfootnote { +m }
   {
     \int_gincr:N \g__ncoltest_note_int
+    \tl_if_empty:NF \g__ncoltest_notewidth_tl
+      {
+        \prop_gput:NeV \g__ncoltest_wantwidth_prop
+          { \int_use:N \g__ncoltest_note_int } \g__ncoltest_notewidth_tl
+      }
     \exp_args:Ne \__ncoltest_footnote:nn
       { \int_use:N \g__ncoltest_note_int } {#1}
   }
 \cs_new_protected:Npn \__ncoltest_footnote:nn #1#2
   {
     \__ncoltest_aux:Nn \NCOL@mark {#1}
-    \footnote { \__ncoltest_aux:Nn \NCOL@text {#1} #2 }
+    \footnote
+      { \__ncoltest_aux:Nn \NCOL@text {#1} \__ncoltest_aux_width:n {#1} #2 }
   }
+%% The mark and the text apart, for a mark inside spanning material
+\NewDocumentCommand \NCOLfootnotemark { }
+  {
+    \int_gincr:N \g__ncoltest_note_int
+    \exp_args:NNe \__ncoltest_aux:Nn \NCOL@mark
+      { \int_use:N \g__ncoltest_note_int }
+    \footnotemark
+  }
+\NewDocumentCommand \NCOLfootnotetext { +m }
+  {
+    \exp_args:Ne \__ncoltest_footnotetext:nn
+      { \int_use:N \g__ncoltest_note_int } {#1}
+  }
+\cs_new_protected:Npn \__ncoltest_footnotetext:nn #1#2
+  { \footnotetext { \__ncoltest_aux:Nn \NCOL@text {#1} #2 } }
 \cs_new_protected:Npn \__ncoltest_check_notes:
   {
     \int_step_inline:nn { \g__ncoltest_note_int }
@@ -198,6 +262,20 @@
                 text~on~page~ \l__ncoltest_b_tl
               }
           }
+        \prop_get:NnNT \g__ncoltest_wantwidth_prop {##1} \l__ncoltest_b_tl
+          {
+            \prop_get:NnNF \g__ncoltest_width_prop {##1} \l__ncoltest_a_tl
+              { \tl_set:Nn \l__ncoltest_a_tl { 0pt } }
+            \dim_compare:nNnF
+              { \dim_abs:n { \l__ncoltest_a_tl - \l__ncoltest_b_tl } } < { 0.01pt }
+              {
+                \__ncoltest_ng:n
+                  {
+                    NCOL-NOTE~NG:~note~##1:~width~ \l__ncoltest_a_tl ,~
+                    want~ \l__ncoltest_b_tl
+                  }
+              }
+          }
       }
   }
 
@@ -207,11 +285,13 @@
   {
     \prop_gclear:N \g__ncoltest_mark_prop
     \prop_gclear:N \g__ncoltest_text_prop
+    \prop_gclear:N \g__ncoltest_width_prop
   }
 \AddToHook { enddocument / afteraux }
   {
     \__ncoltest_check_state:
     \__ncoltest_check_notes:
+    \tl_use:N \g__ncoltest_atcheck_tl
     \bool_if:NTF \g__ncoltest_ng_bool
       { \iow_term:n { NCOL-RESULT~NG } }
       {

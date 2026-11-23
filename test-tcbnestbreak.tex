@@ -1,0 +1,137 @@
+%% test-tcbnestbreak.tex
+%% =====================
+%% Typesetting test: the tcbnestbreak package (breakable tcolorboxes
+%% inside a breakable tcolorbox) in three columns, with the page
+%% footnotes of tcbpagefootnote.
+%%
+%%   pdflatex test-tcbnestbreak.tex   (or xelatex / lualatex / platex /
+%%   uplatex), until there is no "Rerun" warning
+%%   \def\NCOLopt{columns=3,footnotes=span}\input test-tcbnestbreak
+%% "make test" takes the two packages from ../tcbnestbreak and
+%% ../tcbpagefootnote.
+%%
+%% What is covered:
+%%   * a breakable box with two breakable boxes inside, one of them
+%%     with a third box inside: they are broken across columns and
+%%     pages;
+%%   * "page footnote" on the outer box and on two of the boxes
+%%     inside, with footnotes in each of them and in a title; the
+%%     third box inside has no "page footnote" (its footnote stays in
+%%     the box);
+%%   * footnotes of the text before and after the box.
+%%
+%% What to check:
+%%   * NCOL-RESULT OK: every footnote text is on the page of its mark
+%%     and has the width of the footnotes of the page; three boxes
+%%     have flowed, at least two of them are broken, and the frames of
+%%     each box are one "unbroken" frame or a "first" frame, "middle"
+%%     frames and a "last" frame (NCOL-BOX);
+%%   * no error, no warning of ncolumn, tcbpagefootnote or
+%%     tcbnestbreak, no overfull \vbox and no "% split" (of
+%%     \tracingpages) in the log;
+%%   * in the PDF, the frames of the boxes inside follow the parts of
+%%     the outer box from column to column.
+\ifdefined\CLS\else\def\CLS{article}\fi
+\ifdefined\ptexversion\def\CLSOPT{dvipdfmx}\else\def\CLSOPT{}\fi
+\ifdefined\NCOLopt\else\def\NCOLopt{columns=3}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+\expandafter\usepackage\expandafter[\NCOLopt]{ncolumn}
+\usepackage{tcbpagefootnote}
+\usepackage{tcbnestbreak}
+\input{test-common}
+%% No stretch or shrink above the footnotes: a column that needs the
+%% shrink is overfull by the depth of its last line (LaTeX kernel).
+\skip\footins=1\skip\footins
+%% A footnote of three lines
+\newcommand\fn{\NCOLfootnote{note\par note\par note}}
+%% The boxes that flow (hook tcbnestbreak/flow) and the states of
+%% their frames (hook tcbnestbreak/frame, written at shipout).
+%% \NCOLboxes{<boxes>}{<broken>}: exactly <boxes> boxes have flowed and
+%% at least <broken> of them are broken.
+\makeatletter
+\ExplSyntaxOn
+\int_new:N \g__ncoltnb_boxes_int
+\int_new:N \g__ncoltnb_broken_int
+\AddToHookWithArguments { tcbnestbreak/flow }
+  { \iow_now:Ne \@auxout { \exp_not:N \NCOL@flow {#1} } }
+\AddToHookWithArguments { tcbnestbreak/frame }
+  { \iow_shipout:Ne \@auxout { \exp_not:N \NCOL@frame {#1} {#2} } }
+\cs_new_eq:NN \NCOL@flow \use_none:n
+\cs_new_eq:NN \NCOL@frame \use_none:nn
+\cs_new_protected:Npn \__ncoltnb_flow:n #1
+  {
+    \int_gset:Nn \g__ncoltnb_boxes_int
+      { \int_max:nn { \g__ncoltnb_boxes_int } {#1} }
+    \tl_gclear_new:c { g__ncoltnb_frames_#1_tl }
+  }
+\cs_new_protected:Npn \__ncoltnb_frame:nn #1#2
+  {
+    \tl_if_exist:cTF { g__ncoltnb_frames_#1_tl }
+      { \tl_gput_right:cn { g__ncoltnb_frames_#1_tl } { ; #2 } }
+      { \NCOLng { BOX~NG:~#1:~frame~of~a~box~that~has~not~flowed } }
+  }
+\AddToHook { enddocument / afterlastpage }
+  {
+    \cs_gset_eq:NN \NCOL@flow \__ncoltnb_flow:n
+    \cs_gset_eq:NN \NCOL@frame \__ncoltnb_frame:nn
+  }
+\NewDocumentCommand \NCOLboxes { m m }
+  {
+    \NCOLatcheck
+      {
+        \int_step_inline:nn { \g__ncoltnb_boxes_int }
+          {
+            \exp_args:Nnv \regex_match:nnTF
+              { \A(?:;unbroken|;first(?:;middle)*;last)\Z }
+              { g__ncoltnb_frames_##1_tl }
+              { \iow_log:e { NCOL-BOX:~##1 \tl_use:c { g__ncoltnb_frames_##1_tl } } }
+              { \NCOLng { BOX~NG:~##1 \tl_use:c { g__ncoltnb_frames_##1_tl } } }
+            \exp_args:Nnv \regex_match:nnT { ;first } { g__ncoltnb_frames_##1_tl }
+              { \int_gincr:N \g__ncoltnb_broken_int }
+          }
+        \int_compare:nNnF { \g__ncoltnb_boxes_int } = {#1}
+          { \NCOLng { BOX~NG:~\int_use:N \g__ncoltnb_boxes_int \c_space_tl boxes,~want~#1 } }
+        \int_compare:nNnT { \g__ncoltnb_broken_int } < {#2}
+          { \NCOLng { BOX~NG:~\int_use:N \g__ncoltnb_broken_int \c_space_tl broken,~want~#2~or~more } }
+      }
+  }
+\ExplSyntaxOff
+\makeatother
+\NCOLboxes{3}{2}
+\begin{document}
+\NCOLnotewidth
+\tracingpages=1
+\NCOLlines{6}
+text\fn
+\NCOLlines{6}
+\begin{tcolorbox}[breakable, page footnote, title=Outer box]
+outer\fn
+\NCOLlines{10}
+\begin{tcolorbox}[breakable, page footnote, colback=yellow!20, title=Box 1]
+inner\fn
+\NCOLlines{50}
+inner\fn
+\NCOLlines{20}
+\begin{tcolorbox}[breakable, page footnote, colback=red!10,
+  title={Box 2 in box 1\fn}]
+inner\fn
+\NCOLlines{60}
+inner\fn
+\NCOLlines{10}
+\end{tcolorbox}
+\NCOLlines{20}
+inner\fn
+\NCOLlines{10}
+\end{tcolorbox}
+outer\fn
+\NCOLlines{40}
+\begin{tcolorbox}[breakable, colback=green!10, title=Box 3]
+inner\footnote{A footnote that stays in the box.}
+\NCOLlines{30}
+\end{tcolorbox}
+outer\fn
+\NCOLlines{4}
+\end{tcolorbox}
+\NCOLlines{12}
+text\fn
+\end{document}

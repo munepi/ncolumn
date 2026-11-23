@@ -12,6 +12,14 @@ TEXBIN ?=
 ## the footnote area of each page from the .aux file.
 MAXRUNS ?= 8
 
+## The tcbpagefootnote and tcbnestbreak packages, for the tests with
+## them (skipped if they are not there).  These tests take the packages
+## from these directories, not from the TeX Live.
+TPF ?= ../tcbpagefootnote
+TNB ?= ../tcbnestbreak
+HASTPF := $(wildcard $(TPF)/tcbpagefootnote.sty)
+HASTNB := $(wildcard $(TNB)/tcbnestbreak.sty)
+
 .PHONY: ctanzip
 ctanzip: ncolumn.zip ## Archive for CTAN upload
 ncolumn.zip: clean $(DOCS)
@@ -45,6 +53,14 @@ ncolumn.pdf: ncolumn.tex ncolumn.sty
 ##  * TWOCOLUMN: test-twocolumn.tex gives the same pages, pixel by
 ##    pixel (pdftoppm), with ncolumn and with \twocolumn of the LaTeX
 ##    kernel
+##  * TCBPF, TCBNB: test-tcbpagefootnote.tex and test-tcbnestbreak.tex
+##    (tcolorbox with the page footnotes of tcbpagefootnote and the
+##    nested breakable boxes of tcbnestbreak, with each value of
+##    "footnotes", with tagging and in vertical writing): as TESTS,
+##    every footnote text has the width of the footnotes of the page,
+##    and there is no overfull \vbox, no "% split" of \tracingpages (a
+##    footnote that is split or held over) and no warning of the two
+##    packages
 ##  * test-errors-*: the expected error message
 ## A test is "<engine>:<jobname>:<input>".  The output of the engine and
 ## of (x)dvipdfmx is kept in <jobname>.term.
@@ -106,6 +122,40 @@ TESTS := \
   lualatex:test-japanese-tate-lualatex:'\def\CLS{ltjtarticle}\input test-japanese' \
   lualatex:test-japanese-jlreq-tate-lualatex:'\def\CLS{jlreq}\def\CLSOPT{tate}\input test-japanese'
 
+TCBPF := \
+  pdflatex:test-tcbpagefootnote-pdflatex:'\input test-tcbpagefootnote' \
+  xelatex:test-tcbpagefootnote-xelatex:'\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-lualatex:'\input test-tcbpagefootnote' \
+  platex:test-tcbpagefootnote-platex:'\input test-tcbpagefootnote' \
+  uplatex:test-tcbpagefootnote-uplatex:'\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-last-pdflatex:'\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-last-lualatex:'\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbpagefootnote' \
+  uplatex:test-tcbpagefootnote-last-uplatex:'\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-span-pdflatex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-span-lualatex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote' \
+  platex:test-tcbpagefootnote-span-platex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-span2-pdflatex:'\def\NCOLopt{columns=4,footnotes=span,footnote-columns=2}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-span2-lualatex:'\def\NCOLopt{columns=4,footnotes=span,footnote-columns=2}\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-tagging-pdflatex:'\def\NCOLtagging{}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-tagging-lualatex:'\def\NCOLtagging{}\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-tagging-last-pdflatex:'\def\NCOLtagging{}\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-tagging-last-lualatex:'\def\NCOLtagging{}\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbpagefootnote' \
+  pdflatex:test-tcbpagefootnote-tagging-span-pdflatex:'\def\NCOLtagging{}\def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-tagging-span-lualatex:'\def\NCOLtagging{}\def\NCOLopt{columns=3,footnotes=span}\input test-tcbpagefootnote' \
+  platex:test-tcbpagefootnote-tate-platex:'\def\CLS{tarticle}\input test-tcbpagefootnote' \
+  uplatex:test-tcbpagefootnote-tate-uplatex:'\def\CLS{utarticle}\input test-tcbpagefootnote' \
+  lualatex:test-tcbpagefootnote-tate-lualatex:'\def\CLS{ltjtarticle}\input test-tcbpagefootnote'
+
+TCBNB := \
+  pdflatex:test-tcbnestbreak-pdflatex:'\input test-tcbnestbreak' \
+  lualatex:test-tcbnestbreak-lualatex:'\input test-tcbnestbreak' \
+  uplatex:test-tcbnestbreak-uplatex:'\input test-tcbnestbreak' \
+  pdflatex:test-tcbnestbreak-last-pdflatex:'\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbnestbreak' \
+  lualatex:test-tcbnestbreak-last-lualatex:'\def\NCOLopt{columns=3,footnotes=last-column}\input test-tcbnestbreak' \
+  pdflatex:test-tcbnestbreak-span-pdflatex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbnestbreak' \
+  lualatex:test-tcbnestbreak-span-lualatex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbnestbreak' \
+  uplatex:test-tcbnestbreak-span-uplatex:'\def\NCOLopt{columns=3,footnotes=span}\input test-tcbnestbreak'
+
 TWOCOLUMN := \
   pdflatex:test-twocolumn-pdflatex:'\input test-twocolumn' \
   xelatex:test-twocolumn-xelatex:'\input test-twocolumn' \
@@ -125,13 +175,14 @@ SETUP = \
 
 ## Compile $$in with $$eng as $$job, again while the log asks for it
 ## (+ (x)dvipdfmx), and check for errors.  max_print_line: the lines
-## of the log are not broken (see test-common.tex).
+## of the log are not broken (see test-common.tex).  $$texenv: more of
+## the environment (TCBENV).
 RUN = \
   rm -f $$job.aux $$job.dvi $$job.xdv $$job.pdf; \
   opt=; if [ $$eng = xelatex ]; then opt=-no-pdf; fi; \
   n=0; while :; do \
     n=`expr $$n + 1`; \
-    env max_print_line=1000 $$eng $$opt -interaction=nonstopmode -jobname=$$job "$$in" >$$job.term 2>&1 || true; \
+    env max_print_line=1000 $$texenv $$eng $$opt -interaction=nonstopmode -jobname=$$job "$$in" >$$job.term 2>&1 || true; \
     grep -q 'Rerun to get' $$job.log || break; \
     [ $$n -lt $(MAXRUNS) ] || break; \
   done; \
@@ -147,16 +198,41 @@ RESULT = \
   if grep 'ncolumn Warning' $$job.log | grep -v "'stfloats'"; then \
     echo "NG: ncolumn warning in $$job.log"; exit 1; fi
 
+## The tests of TCBPF and TCBNB take the two packages from $(TPF) and
+## $(TNB) (tcbpagefootnote.lua as well)
+TCBENV = TEXINPUTS=.:$(TPF):$(TNB):$$TEXINPUTS LUAINPUTS=$(TPF):$$LUAINPUTS
+
+## Check $$job.log of a test of TCBPF or TCBNB
+TCBRESULT = \
+  if grep -q 'Overfull .vbox' $$job.log; then \
+    echo "NG: overfull \\vbox in $$job.log"; exit 1; fi; \
+  if grep -q '^% split' $$job.log; then \
+    echo "NG: a footnote is split or held over in $$job.log"; exit 1; fi; \
+  if grep -q 'tcbpagefootnote Warning\|tcbnestbreak Warning' $$job.log; then \
+    echo "NG: warning in $$job.log"; exit 1; fi
+
 .PHONY: test
 test:
 	@set -e; \
 	$(SETUP); \
+	texenv=; \
 	for t in $(TESTS); do \
 	  eng=$${t%%:*}; rest=$${t#*:}; job=$${rest%%:*}; in=$${rest#*:}; \
 	  echo "== $$eng $$job"; \
 	  $(RUN); \
 	  $(RESULT); \
 	done; \
+	$(if $(HASTPF),,echo "== skipped: test-tcbpagefootnote and test-tcbnestbreak (no $(TPF)/tcbpagefootnote.sty)";) \
+	$(if $(HASTPF),$(if $(HASTNB),,echo "== skipped: test-tcbnestbreak (no $(TNB)/tcbnestbreak.sty)";)) \
+	texenv="$(TCBENV)"; \
+	for t in $(if $(HASTPF),$(TCBPF) $(if $(HASTNB),$(TCBNB))); do \
+	  eng=$${t%%:*}; rest=$${t#*:}; job=$${rest%%:*}; in=$${rest#*:}; \
+	  echo "== $$eng $$job"; \
+	  $(RUN); \
+	  $(RESULT); \
+	  $(TCBRESULT); \
+	done; \
+	texenv=; \
 	for t in $(TWOCOLUMN); do \
 	  eng=$${t%%:*}; rest=$${t#*:}; on=$${rest%%:*}; input=$${rest#*:}; \
 	  echo "== $$eng $$on"; \
