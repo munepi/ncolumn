@@ -33,9 +33,9 @@ author      = ["Munehiro Yamamoto"]
 license     = ["lppl1.3c"]
 topic       = ["multicol", "float", "footnote"]
 # home        = "https://..."
-# bugtracker  = ["https://..."]
+bugtracker  = ["https://github.com/munepi/ncolumn/issues"]
 # support     = "https://..."
-# repository  = ["https://..."]
+repository  = ["https://github.com/munepi/ncolumn"]
 # development = "https://..."
 
 archive     = "ncolumn.zip"  # built by "make ctanzip"
