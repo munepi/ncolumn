@@ -17,9 +17,10 @@ more columns.  With two columns, the pages are those of
 </p>
 <p>
 Material can span several columns from one of the four corners of the
-page: <code>figure*</code> and <code>table*</code> take the keys
-<code>span</code> and <code>at</code>, and <code>\spanblock</code> puts
-material that is not a float, such as a heading.  The footnotes of a
+page: <code>figure*</code>, <code>table*</code> and the starred floats
+of other packages take the keys <code>span</code> and <code>at</code>,
+and <code>\spanblock</code> puts material that is not a float, such as
+a heading.  The footnotes of a
 page are put into each column, into the last column, or into an area
 of one or more columns across the page.
 </p>

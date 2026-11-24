@@ -61,6 +61,10 @@ ncolumn.pdf: ncolumn.tex ncolumn.sty
 ##    and there is no overfull \vbox, no "% split" of \tracingpages (a
 ##    footnote that is split or held over) and no warning of the two
 ##    packages
+##  * ALGL: test-algorithmlite.tex (the algorithm float of the
+##    algorithmlite package, as an example of a float of another
+##    package): as TESTS; skipped if the TeX Live does not have the
+##    package
 ##  * test-errors-*: the expected error message
 ## A test is "<engine>:<jobname>:<input>".  The output of the engine and
 ## of (x)dvipdfmx is kept in <jobname>.term.
@@ -126,6 +130,13 @@ TESTS := \
   uplatex:test-japanese-tate-last-uplatex:'\def\CLS{utarticle}\def\NCOLopt{columns=3,footnotes=last-column}\input test-japanese' \
   lualatex:test-japanese-tate-lualatex:'\def\CLS{ltjtarticle}\input test-japanese' \
   lualatex:test-japanese-jlreq-tate-lualatex:'\def\CLS{jlreq}\def\CLSOPT{tate}\input test-japanese'
+
+ALGL := \
+  pdflatex:test-algorithmlite-pdflatex:'\input test-algorithmlite' \
+  xelatex:test-algorithmlite-xelatex:'\input test-algorithmlite' \
+  lualatex:test-algorithmlite-lualatex:'\input test-algorithmlite' \
+  platex:test-algorithmlite-platex:'\input test-algorithmlite' \
+  uplatex:test-algorithmlite-uplatex:'\input test-algorithmlite'
 
 TCBPF := \
   pdflatex:test-tcbpagefootnote-pdflatex:'\input test-tcbpagefootnote' \
@@ -227,6 +238,15 @@ test:
 	  $(RUN); \
 	  $(RESULT); \
 	done; \
+	algl=1; kpsewhich algorithmlite.sty >/dev/null || \
+	  { algl=; echo "== skipped: test-algorithmlite (no algorithmlite.sty)"; }; \
+	for t in $(ALGL); do \
+	  [ -n "$$algl" ] || break; \
+	  eng=$${t%%:*}; rest=$${t#*:}; job=$${rest%%:*}; in=$${rest#*:}; \
+	  echo "== $$eng $$job"; \
+	  $(RUN); \
+	  $(RESULT); \
+	done; \
 	$(if $(HASTPF),,echo "== skipped: test-tcbpagefootnote and test-tcbnestbreak (no $(TPF)/tcbpagefootnote.sty)";) \
 	$(if $(HASTPF),$(if $(HASTNB),,echo "== skipped: test-tcbnestbreak (no $(TNB)/tcbnestbreak.sty)";)) \
 	texenv="$(TCBENV)"; \
@@ -266,6 +286,6 @@ test:
 .PHONY: clean
 clean: ## Clean this repository
 	rm -rf ncolumn.zip ncolumn
-	rm -f *.aux *.log *.out *.toc *.dvi *.xdv *.synctex.gz *.term
+	rm -f *.aux *.log *.out *.toc *.loa *.dvi *.xdv *.synctex.gz *.term
 	rm -f test-*.pdf test-*.png
 	find . -type f -name "*~" -delete

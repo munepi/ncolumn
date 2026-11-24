@@ -9,7 +9,7 @@
 \usepackage{xcolor}
 \usepackage{ncolumn}
 \usepackage[colorlinks, allcolors=blue!50!black]{hyperref}
-\newcommand*\ncolversion{v0.2 (2026/11/24)}
+\newcommand*\ncolversion{v0.3 (2026/11/24)}
 \newcommand*\cs[1]{\texttt{\char`\\#1}}
 \newcommand*\pkg[1]{\textsf{#1}}
 \newcommand*\key[1]{\texttt{#1}}
@@ -119,6 +119,11 @@ side of the first and of the last column.  In yoko this is what it
 looks like.  In tate the first column is the upper one and the top of
 a column is on the right, so \key{tl} is the upper right corner of
 the page.
+
+The starred floats of other packages take the same arguments, as they
+are made with the same macro of \LaTeX{} (\cs{@dblfloat}) as
+\texttt{figure*} and \texttt{table*}.  \texttt{algorithm*} of the
+\pkg{algorithmlite} package is tested.
 
 A page can have several pieces of spanning material.  A piece is put
 on a page only if the columns it covers have the same height reserved
@@ -381,6 +386,9 @@ with two columns, every page is the same, pixel by pixel, as with
 \texttt{test-tcbpagefootnote.tex} and \texttt{test-tcbnestbreak.tex}
 also check that every footnote text has the width of the footnotes of
 the page and that no footnote is split or held over.
+\texttt{test-algorithmlite.tex} checks a float of another package,
+the algorithms of \pkg{algorithmlite}: each of them has to be as wide
+as the columns it spans.
 \texttt{test-text.tex},
 \texttt{test-japanese.tex} (yoko and tate) and
 \texttt{test-tcolorbox.tex} are documents with real text that are also
@@ -396,6 +404,12 @@ tests.
   right after \cs{ncolumn}, now act on that page: the height of its
   footnote area was not reserved.  Tested with \pkg{tcbpagefootnote}
   and \pkg{tcbnestbreak}.
+\item[v0.3 (2026/11/24)] The material of
+  \cs{twocolumn}\texttt{[...]}, \cs{ncolumn}\marg{\meta{N}}\texttt{[...]}
+  or \cs{spanblock} at the top of a page was put too low if it was
+  lower than \cs{dbltextfloatsep}, e.g.\@ a single line.  Tested with
+  \pkg{algorithmlite}, as an example of the starred floats of other
+  packages.
 \end{description}
 
 \section{License}

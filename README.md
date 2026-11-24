@@ -50,6 +50,8 @@ If the package is loaded without `columns` in a document whose class has the opt
 
 An argument of `figure*` or `table*` with a `=` is read as a list of keys. `span` is the number of columns and `at` is the corner: `tl`, `tr`, `bl` or `br`. The corner is given in the directions of the text: `t` and `b` are the top and the bottom of a column, `l` and `r` are the side of the first and of the last column. In yoko this is what it looks like (top left, top right, bottom left, bottom right). In tate the first column is the upper one and the top of a column is on the right, so `tl` is the upper right corner of the page.
 
+The starred floats of other packages take the same arguments, as they are made with the same macro of LaTeX (`\@dblfloat`) as `figure*` and `table*`. `algorithm*` of the algorithmlite package is tested.
+
 A page can have several pieces of spanning material. A piece is put on a page only if the columns it covers have the same height reserved so far; otherwise it would leave a hole, and it goes to the next page.
 
 As in LaTeX, a spanning float is put on a later page than the one where it is met. With `same-page-spans`, it is put on the page where it is met
@@ -165,6 +167,7 @@ stfloats gives a warning only, as jlreq loads it with LuaLaTeX; ncolumn replaces
 * `NCOL-RESULT OK`: the state of the package for each page is the one that the test expects (the heights that are reserved at the top and at the bottom of each column, the spanning material, and the first and the last mark of each column), and every footnote text is on the page of its mark (see `test-common.tex`);
 * `test-twocolumn`: every page is the same, pixel by pixel, with ncolumn and with `\twocolumn` of the LaTeX kernel (needs `pdftoppm`);
 * `test-tcbpagefootnote`, `test-tcbnestbreak`: every footnote text also has the width of the footnotes of the page, and no footnote is split or held over. These tests take the two packages from `../tcbpagefootnote` and `../tcbnestbreak` (`make test TPF=<directory> TNB=<directory>` for other places) and are skipped if they are not there;
+* `test-algorithmlite`: each algorithm is as wide as the columns it spans. This test is skipped if the TeX Live does not have the algorithmlite package;
 * `test-errors`: the expected error message.
 
 | Test | Engines | What it covers |
@@ -180,6 +183,7 @@ stfloats gives a warning only, as jlreq loads it with LuaLaTeX; ncolumn replaces
 | `test-text.tex` | all five; each value of `footnotes` | a document with real text: sections, running heads, captions, floats from each of the four corners, `\spanblock`, footnotes, four columns with `same-page-spans` and `\marginpar` |
 | `test-japanese.tex` | platex and uplatex (jsarticle, tarticle, utarticle), lualatex (ltjsarticle, ltjtarticle, jlreq in yoko and in tate) | a document with Japanese text, in yoko and in tate |
 | `test-tcolorbox.tex` | pdflatex, lualatex | tcolorbox with `breakable` across columns and pages, in a spanning float and in a `\spanblock`; float (`[H]`), caption, hyperref, `\DocumentMetadata` |
+| `test-algorithmlite.tex` | all five | a float of another package: `algorithm*` of algorithmlite across all columns at the top and at the bottom, across two columns with `span` and `at`; `algorithm` in a column, floating and with `[H]`; `\listofalgorithms` |
 | `test-tcbpagefootnote.tex` | all five; each value of `footnotes`; pdflatex and lualatex with tagging; platex, uplatex and lualatex in tate | tcbpagefootnote: `page footnote` in a box that is not broken, in breakable boxes that are broken across columns and pages, and a box in a `\spanblock` |
 | `test-tcbnestbreak.tex` | pdflatex, lualatex, uplatex; each value of `footnotes` | tcbnestbreak: breakable boxes inside a breakable box, three deep, across columns and pages, with `page footnote` |
 | `test-twocolumn.tex` | all five | two columns: the same pages as `\twocolumn` of the LaTeX kernel |

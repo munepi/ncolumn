@@ -2,6 +2,7 @@
 *.log
 *.out
 *.toc
+*.loa
 *.dvi
 *.xdv
 *.synctex.gz

@@ -14,7 +14,9 @@
 %%     the default), a float page;
 %%   * footnotes, \marginpar, \enlargethispage;
 %%   * \clearpage with a figure* that waits, \twocolumn[...],
-%%     \onecolumn with a figure*, \twocolumn.
+%%     \twocolumn[...] with material that is lower than
+%%     \dbltextfloatsep (one line), \onecolumn with a figure*,
+%%     \twocolumn.
 %%
 %% What to check:
 %%   * no error;
@@ -52,6 +54,8 @@
 \lipsum[37-45]
 \enlargethispage{2\baselineskip}
 \lipsum[46-52]
+\twocolumn[\noindent A line across both columns.]
+\lipsum[53-56]
 \onecolumn
 \section{One column}
 \lipsum[1-3]
