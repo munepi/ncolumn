@@ -1,6 +1,6 @@
 # ncolumn Package
 
-**LaTeX: N columns in the way of `\twocolumn`, with material that spans columns**
+**LaTeX: N columns in the way of `\twocolumn`, with spanning material**
 
 `multicol` collects the material of all columns and splits it into the columns afterwards. Ordinary floats cannot be used in it, and packages that look at the room that is left on the page, such as tcolorbox with `breakable`, need extra care.
 
